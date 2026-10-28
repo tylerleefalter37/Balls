@@ -1,0 +1,2581 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full select-none bg-neutral-950 text-neutral-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Ball Python Tycoon</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #09090b;
+      color: #f4f4f5;
+      overflow-x: hidden;
+      touch-action: manipulation;
+    }
+    .pixel-canvas {
+      image-rendering: -moz-crisp-edges;
+      image-rendering: -webkit-crisp-edges;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .safe-top {
+      padding-top: max(env(safe-area-inset-top), 12px);
+    }
+    .safe-bottom {
+      padding-bottom: max(env(safe-area-inset-bottom), 16px);
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="h-full flex justify-center bg-black">
+
+  <!-- Mobile Wrapper Frame -->
+  <div class="w-full max-w-md h-full flex flex-col bg-neutral-950 border-x border-neutral-800/60 shadow-2xl relative overflow-hidden">
+
+    <!-- iOS Dynamic Island & Status Bar -->
+    <header class="safe-top px-5 pb-3 bg-neutral-950/90 backdrop-blur-md border-b border-neutral-900 sticky top-0 z-40">
+      <div class="flex justify-between items-center h-7 mb-2">
+        <span class="text-xs font-semibold tracking-tight text-neutral-300" id="ios-time">9:41</span>
+        <!-- Dynamic Island pill -->
+        <div class="w-24 h-5 bg-black rounded-full flex items-center justify-center border border-neutral-800/80 shadow-inner">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-[9px] font-mono tracking-widest text-neutral-400 font-bold uppercase">REPTILE OS</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 text-neutral-300">
+          <span class="text-[10px] font-mono font-bold">5G</span>
+          <div class="w-5 h-2.5 border border-neutral-400 rounded-sm p-0.5 flex items-center">
+            <div class="h-full w-full bg-emerald-400 rounded-2xs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Bar -->
+      <div class="flex items-center justify-between mt-1">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-950/40">
+            <span class="text-base">🐍</span>
+          </div>
+          <div>
+            <div class="text-[10px] text-neutral-400 font-semibold uppercase tracking-wider">Facility Funds</div>
+            <div class="text-lg font-extrabold text-emerald-400 tracking-tight" id="cash-display">$1,500</div>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <div class="bg-neutral-900/90 px-2.5 py-1 rounded-xl border border-neutral-800 text-right">
+            <div class="text-[9px] text-neutral-400 uppercase font-semibold">Reputation</div>
+            <div class="text-xs font-bold text-amber-400" id="rep-display">★ 100</div>
+          </div>
+          <button onclick="toggleAudio()" id="audio-toggle-btn" class="w-8 h-8 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs active:scale-95 transition">
+            🔊
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Scrollable App Container -->
+    <main id="main-content" class="flex-1 overflow-y-auto px-4 py-3 hide-scrollbar space-y-4 pb-28">
+
+      <!-- TAB 1: BREEDING RACK & VAULT -->
+      <section id="tab-rack" class="space-y-4">
+        <!-- Rack Header & Controls -->
+        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 p-4 rounded-3xl border border-neutral-800/80 shadow-lg relative overflow-hidden">
+          <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none"></div>
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-[10px] uppercase tracking-wider text-neutral-400 font-bold">Breeding Tubs</p>
+              <h2 class="text-xl font-black text-white mt-0.5 flex items-center gap-1.5">
+                Snake Rack <span class="text-xs text-neutral-400 font-normal" id="rack-count">(0)</span>
+              </h2>
+            </div>
+            <div class="flex gap-1.5">
+              <button onclick="sellLowestValueSnake()" class="text-xs bg-rose-950/60 hover:bg-rose-900/80 active:scale-95 text-rose-300 px-2.5 py-1.5 rounded-xl border border-rose-800/60 transition flex items-center gap-1 font-semibold">
+                <span>📉</span> Sell Lowest
+              </button>
+              <button onclick="feedAllSnakes()" class="text-xs bg-neutral-800 hover:bg-neutral-700 active:scale-95 text-neutral-200 px-3 py-1.5 rounded-xl border border-neutral-700 transition flex items-center gap-1.5 font-semibold">
+                <span>🐭</span> Feed All
+              </button>
+            </div>
+          </div>
+
+          <!-- View Switcher: General Stock vs Personal Breeder Vault -->
+          <div class="flex gap-2 mt-3 pt-3 border-t border-neutral-800/80">
+            <button onclick="setRackView('all')" id="rack-view-all-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-neutral-800 text-white border border-neutral-700 transition">
+              General Stock
+            </button>
+            <button onclick="setRackView('vault')" id="rack-view-vault-btn" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-amber-400/80 hover:text-amber-300 border border-transparent transition flex items-center gap-1">
+              <span>👑</span> Breeder Vault (<span id="vault-count">0</span>)
+            </button>
+          </div>
+          <p class="text-[11px] text-neutral-400 mt-2" id="rack-view-hint">
+            Tap any snake to inspect genes, change head pose, put on the sales floor, or move into your private vault.
+          </p>
+        </div>
+
+        <!-- Snake Card Grid -->
+        <div id="snakes-grid" class="grid grid-cols-2 gap-3 pb-8">
+          <!-- Populated by JavaScript -->
+        </div>
+      </section>
+
+      <!-- TAB 2: BREEDING & INCUBATOR -->
+      <section id="tab-breeding" class="space-y-4 hidden">
+        <!-- Automation Banner -->
+        <div class="p-3.5 bg-gradient-to-r from-emerald-950/40 via-neutral-900 to-teal-950/40 border border-emerald-800/40 rounded-2xl flex items-center justify-between">
+          <div class="space-y-0.5">
+            <div class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span>🤖</span> Auto-Breeder Facility
+            </div>
+            <div class="text-[10px] text-neutral-400">
+              Automatically pairs ready breeders & hatches incubator clutches.
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="toggle-auto-breed" onchange="toggleAutoBreeder()" class="sr-only peer">
+            <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+          </label>
+        </div>
+
+        <!-- Pairing Card -->
+        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-3xl space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+                <span>🧬</span> Breeder Pair Selection
+              </h3>
+              <p class="text-[11px] text-neutral-400">Pair an adult male (600g+) with an adult female (1200g+)</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <!-- Sire -->
+            <div class="p-3 bg-neutral-950/70 border border-neutral-800 rounded-2xl flex flex-col items-center">
+              <span class="text-[10px] uppercase font-bold text-blue-400 mb-1">♂ Sire (Male)</span>
+              <select id="select-sire" onchange="updatePairingPreview()" class="w-full text-xs bg-neutral-900 border border-neutral-700 rounded-xl p-2 text-white outline-none">
+                <option value="">Choose Male...</option>
+              </select>
+              <div id="sire-info" class="text-[10px] text-neutral-400 mt-2 text-center truncate w-full">-</div>
+            </div>
+
+            <!-- Dam -->
+            <div class="p-3 bg-neutral-950/70 border border-neutral-800 rounded-2xl flex flex-col items-center">
+              <span class="text-[10px] uppercase font-bold text-rose-400 mb-1">♀ Dam (Female)</span>
+              <select id="select-dam" onchange="updatePairingPreview()" class="w-full text-xs bg-neutral-900 border border-neutral-700 rounded-xl p-2 text-white outline-none">
+                <option value="">Choose Female...</option>
+              </select>
+              <div id="dam-info" class="text-[10px] text-neutral-400 mt-2 text-center truncate w-full">-</div>
+            </div>
+          </div>
+
+          <button onclick="attemptPairing()" id="pair-btn" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-2xl text-xs shadow-lg shadow-emerald-950/50 active:scale-98 transition">
+            Pair Breeders ($80 Pairing Fee)
+          </button>
+        </div>
+
+        <!-- Incubator Clutches -->
+        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-3xl space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+              <span>🥚</span> Egg Incubator (88.5°F)
+            </h3>
+            <span class="text-[11px] text-neutral-400" id="incubator-count">0 Active Clutches</span>
+          </div>
+
+          <div id="clutches-list" class="space-y-3">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: EXPO MARKET, SHOWROOM FLOOR & BOUNTIES -->
+      <section id="tab-market" class="space-y-4 hidden">
+        <!-- Auto Liquidate Low-Value Option -->
+        <div class="p-3.5 bg-gradient-to-r from-rose-950/40 via-neutral-900 to-amber-950/30 border border-rose-800/40 rounded-2xl flex items-center justify-between">
+          <div class="space-y-0.5">
+            <div class="text-xs font-bold text-white flex items-center gap-1.5">
+              <span>⚡</span> Auto-Liquidate Low Value Snakes
+            </div>
+            <div class="text-[10px] text-neutral-400">
+              When rack exceeds 8 snakes, auto-sells lowest non-vault snake every 15s.
+            </div>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="toggle-auto-sell" onchange="toggleAutoSell()" class="sr-only peer">
+            <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
+          </label>
+        </div>
+
+        <!-- Showroom Display Floor -->
+        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 p-4 rounded-3xl border border-neutral-800 space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <span class="text-[10px] uppercase tracking-wider text-amber-400 font-bold">Expo Showroom</span>
+              <h3 class="text-base font-extrabold text-white flex items-center gap-1.5">
+                <span>🎪</span> Booth Display Tables
+              </h3>
+            </div>
+            <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold">
+              <span id="floor-count">0</span>/4 On Display
+            </span>
+          </div>
+          <p class="text-[11px] text-neutral-400">
+            Choose up to 4 snakes from your rack to put on the showroom floor. Walk-in buyers pay higher markups for displayed snakes!
+          </p>
+
+          <div id="floor-grid" class="grid grid-cols-2 gap-3 pt-1">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Customer Request Bounties -->
+        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-3xl space-y-3">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+                <span>📋</span> Client Morph Requests
+              </h3>
+              <p class="text-[10px] text-neutral-400">Fulfill specific collector requests for reputation and cash bonuses</p>
+            </div>
+            <button onclick="refreshRequests()" class="text-[11px] text-neutral-400 hover:text-white px-2 py-1 rounded-lg bg-neutral-800 active:scale-95 transition">
+              Refresh
+            </button>
+          </div>
+
+          <div id="requests-list" class="space-y-2.5">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Live Walk-in Buyer Dialog -->
+        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-3xl space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Walk-In Buyer</span>
+              <h3 class="text-sm font-bold text-white mt-0.5" id="customer-name">Sophie (Pet Lover)</h3>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-neutral-800 text-neutral-300 border border-neutral-700" id="customer-type-badge">
+              Pet Owner
+            </span>
+          </div>
+
+          <div class="p-3 bg-neutral-950/80 rounded-2xl border border-neutral-800/80 text-xs italic text-neutral-300" id="customer-quote">
+            "Looking for a sweet docile pet snake with bright colors! What do you have on display?"
+          </div>
+
+          <div id="customer-deal-box" class="p-3 bg-neutral-950/60 rounded-2xl border border-neutral-800 text-xs space-y-2 hidden">
+            <div class="flex justify-between text-neutral-400">
+              <span>Target Snake:</span>
+              <span class="font-bold text-white" id="customer-target-name">-</span>
+            </div>
+            <div class="flex justify-between text-neutral-400">
+              <span>Customer Offer:</span>
+              <span class="font-extrabold text-emerald-400 text-sm" id="customer-offer-val">$0</span>
+            </div>
+            <div class="flex gap-2 pt-1">
+              <button onclick="acceptCustomerOffer()" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs active:scale-95 transition">
+                Accept Deal
+              </button>
+              <button onclick="haggleCustomerOffer()" class="flex-1 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs active:scale-95 transition">
+                Haggle (+20%)
+              </button>
+              <button onclick="rejectCustomerDeal()" class="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-xl text-xs active:scale-95 transition">
+                Pass
+              </button>
+            </div>
+          </div>
+
+          <button onclick="summonNewCustomer()" class="w-full py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 font-semibold rounded-2xl text-xs active:scale-95 transition">
+            Greet Next Attendee
+          </button>
+        </div>
+
+        <!-- Expo Classifieds Market -->
+        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-3xl space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+              <span>🏷️</span> Reptile Expo Breeders Market
+            </h3>
+            <button onclick="refreshClassifieds()" class="text-[11px] text-neutral-400 hover:text-white px-2 py-1 rounded-lg bg-neutral-800 active:scale-95 transition">
+              Refresh Booths
+            </button>
+          </div>
+          <p class="text-[11px] text-neutral-400">Purchase new bloodlines, breeders, and rare morph stock.</p>
+
+          <div id="classifieds-list" class="space-y-3">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: GENETICS MANUAL & PUNNETT CALCULATOR -->
+      <section id="tab-manual" class="space-y-4 hidden">
+        <!-- Genetics Guide Header -->
+        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-3xl space-y-2">
+          <h3 class="text-base font-bold text-white flex items-center gap-1.5">
+            <span>📖</span> Breeder's Field Manual
+          </h3>
+          <p class="text-xs text-neutral-400 leading-relaxed">
+            Ball Python genetics obey strict Mendelian inheritance:
+          </p>
+          <div class="grid grid-cols-3 gap-2 pt-1 text-[11px]">
+            <div class="p-2 bg-neutral-950 rounded-xl border border-neutral-800">
+              <span class="font-bold text-emerald-400 block">Dominant</span>
+              <p class="text-neutral-400 text-[10px] mt-0.5">Visible with 1 copy. Spider, Pinstripe, Champagne.</p>
+            </div>
+            <div class="p-2 bg-neutral-950 rounded-xl border border-neutral-800">
+              <span class="font-bold text-amber-400 block">Codominant</span>
+              <p class="text-neutral-400 text-[10px] mt-0.5">Has a "Super" form with 2 copies. Pastel, Banana.</p>
+            </div>
+            <div class="p-2 bg-neutral-950 rounded-xl border border-neutral-800">
+              <span class="font-bold text-purple-400 block">Recessive</span>
+              <p class="text-neutral-400 text-[10px] mt-0.5">Needs 2 copies for visual. 1 copy is 100% Het.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Punnett Sandbox Calculator -->
+        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-3xl space-y-3">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider">🔬 Punnett Odds Calculator</h4>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <label class="text-[10px] text-neutral-400 uppercase font-semibold">Sire Gene</label>
+              <select id="calc-sire-gene" class="w-full mt-1 bg-neutral-950 border border-neutral-700 rounded-xl p-2 text-white text-xs outline-none">
+                <option value="Piebald">Piebald (Recessive)</option>
+                <option value="Clown">Clown (Recessive)</option>
+                <option value="Albino">Albino (Recessive)</option>
+                <option value="Pastel">Pastel (Incomplete Dom)</option>
+                <option value="Spider">Spider (Dominant)</option>
+                <option value="Blue-Eyed Leucistic">Blue-Eyed Leucistic</option>
+                <option value="Blue Insularis">Blue Insularis</option>
+                <option value="Gaboon Viper">Gaboon Viper</option>
+                <option value="Candy">Candy (Recessive)</option>
+                <option value="Axanthic">Axanthic (Recessive)</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] text-neutral-400 uppercase font-semibold">Dam Gene</label>
+              <select id="calc-dam-gene" class="w-full mt-1 bg-neutral-950 border border-neutral-700 rounded-xl p-2 text-white text-xs outline-none">
+                <option value="Normal">Normal (Wild Type)</option>
+                <option value="Piebald">Piebald (Recessive)</option>
+                <option value="Het Piebald">100% Het Piebald</option>
+                <option value="Pastel">Pastel (Incomplete Dom)</option>
+                <option value="Spider">Spider (Dominant)</option>
+                <option value="Blue Insularis">Blue Insularis</option>
+                <option value="Gaboon Viper">Gaboon Viper</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="calculatePunnettOdds()" class="w-full py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-xs font-bold transition">
+            Calculate Clutch Distribution
+          </button>
+          <div id="punnett-result" class="p-3 bg-neutral-950 rounded-2xl border border-neutral-800/80 text-xs text-neutral-300 space-y-1">
+            Tap calculate to inspect genetic odds.
+          </div>
+        </div>
+
+        <!-- Encyclopedia of Morphs -->
+        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-3xl space-y-3">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider">🧬 Morph Library & Rarity</h4>
+          <div class="space-y-2 text-xs" id="morph-encyclopedia">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: GOD MODE -->
+      <section id="tab-god" class="space-y-4 hidden">
+        <div class="bg-gradient-to-br from-purple-950/50 to-neutral-900 p-4 rounded-3xl border border-purple-800/50 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">⚡</span>
+            <div>
+              <h3 class="text-base font-extrabold text-white">God Mode Debug Suite</h3>
+              <p class="text-[10px] text-purple-300">Overrule laws of biology, speed up time, and synthesize genetics</p>
+            </div>
+          </div>
+
+          <!-- Quick Cheat Buttons -->
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="cheatAddCash(10000)" class="py-2.5 bg-neutral-800 hover:bg-neutral-700 text-emerald-400 font-bold rounded-xl text-xs border border-neutral-700 active:scale-95 transition">
+              + $10,000 Cash
+            </button>
+            <button onclick="cheatAddCash(100000)" class="py-2.5 bg-neutral-800 hover:bg-neutral-700 text-emerald-300 font-bold rounded-xl text-xs border border-neutral-700 active:scale-95 transition">
+              + $100,000 Cash
+            </button>
+            <button onclick="cheatHatchClutches()" class="py-2.5 bg-neutral-800 hover:bg-neutral-700 text-amber-400 font-bold rounded-xl text-xs border border-neutral-700 active:scale-95 transition">
+              ⚡ Instant Hatch Eggs
+            </button>
+            <button onclick="cheatSummonVIP()" class="py-2.5 bg-neutral-800 hover:bg-neutral-700 text-purple-300 font-bold rounded-xl text-xs border border-neutral-700 active:scale-95 transition">
+              👑 Summon VIP Whale
+            </button>
+          </div>
+        </div>
+
+        <!-- Custom DNA Synthesizer -->
+        <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-3xl space-y-3">
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+            <span>🧬</span> Custom Snake DNA Synthesizer
+          </h4>
+          <p class="text-[11px] text-neutral-400">Select any combination of genes to synthesize into your rack immediately:</p>
+
+          <div class="grid grid-cols-2 gap-2 text-xs" id="synthesizer-gene-checkboxes">
+            <!-- Standard Genes -->
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-neutral-800 cursor-pointer">
+              <input type="checkbox" id="gene-piebald" class="accent-emerald-500 rounded">
+              <span class="text-neutral-200">Piebald</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-neutral-800 cursor-pointer">
+              <input type="checkbox" id="gene-spider" class="accent-emerald-500 rounded">
+              <span class="text-neutral-200">Spider</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-neutral-800 cursor-pointer">
+              <input type="checkbox" id="gene-pinstripe" class="accent-emerald-500 rounded">
+              <span class="text-neutral-200">Pinstripe</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-neutral-800 cursor-pointer">
+              <input type="checkbox" id="gene-champagne" class="accent-emerald-500 rounded">
+              <span class="text-neutral-200">Champagne</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-neutral-800 cursor-pointer">
+              <input type="checkbox" id="gene-banana" class="accent-emerald-500 rounded">
+              <span class="text-neutral-200">Banana</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-neutral-800 cursor-pointer">
+              <input type="checkbox" id="gene-pastel" class="accent-emerald-500 rounded">
+              <span class="text-neutral-200">Pastel</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-neutral-800 cursor-pointer">
+              <input type="checkbox" id="gene-clown" class="accent-emerald-500 rounded">
+              <span class="text-neutral-200">Clown</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-neutral-800 cursor-pointer">
+              <input type="checkbox" id="gene-albino" class="accent-emerald-500 rounded">
+              <span class="text-neutral-200">Albino</span>
+            </label>
+
+            <!-- Exotic Morphs -->
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-cyan-800/50 cursor-pointer">
+              <input type="checkbox" id="gene-blueinsularis" class="accent-cyan-500 rounded">
+              <span class="text-cyan-300 font-bold">Blue Insularis</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-amber-800/50 cursor-pointer">
+              <input type="checkbox" id="gene-gaboon" class="accent-amber-500 rounded">
+              <span class="text-amber-300 font-bold">Gaboon Viper</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-sky-800/50 cursor-pointer">
+              <input type="checkbox" id="gene-bel" class="accent-sky-400 rounded">
+              <span class="text-sky-300 font-bold">Blue-Eyed Lucy</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-orange-800/50 cursor-pointer">
+              <input type="checkbox" id="gene-sunset" class="accent-orange-500 rounded">
+              <span class="text-orange-300 font-bold">Sunset</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-neutral-700 cursor-pointer">
+              <input type="checkbox" id="gene-pandapied" class="accent-white rounded">
+              <span class="text-white font-bold">Panda Pied</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-purple-800/50 cursor-pointer">
+              <input type="checkbox" id="gene-lavender" class="accent-purple-400 rounded">
+              <span class="text-purple-300 font-bold">Lavender Albino</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-slate-700 cursor-pointer">
+              <input type="checkbox" id="gene-axanthic" class="accent-slate-400 rounded">
+              <span class="text-slate-300 font-bold">Axanthic</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-rose-800/50 cursor-pointer">
+              <input type="checkbox" id="gene-candy" class="accent-rose-500 rounded">
+              <span class="text-rose-300 font-bold">Candy</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-yellow-800/50 cursor-pointer">
+              <input type="checkbox" id="gene-highway" class="accent-yellow-500 rounded">
+              <span class="text-yellow-300 font-bold">Highway</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-teal-800/50 cursor-pointer">
+              <input type="checkbox" id="gene-ghost" class="accent-teal-400 rounded">
+              <span class="text-teal-300 font-bold">Ghost / Hypo</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-amber-700/50 cursor-pointer">
+              <input type="checkbox" id="gene-enchi" class="accent-amber-400 rounded">
+              <span class="text-amber-200 font-bold">Enchi</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-orange-800/50 cursor-pointer">
+              <input type="checkbox" id="gene-leopard" class="accent-orange-400 rounded">
+              <span class="text-orange-200 font-bold">Leopard</span>
+            </label>
+
+            <!-- 10 NEW ULTRA MORPHS -->
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-emerald-700/50 cursor-pointer">
+              <input type="checkbox" id="gene-dragonscale" class="accent-emerald-400 rounded">
+              <span class="text-emerald-300 font-bold">Dragon Scale</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-indigo-700/50 cursor-pointer">
+              <input type="checkbox" id="gene-nebula" class="accent-indigo-400 rounded">
+              <span class="text-indigo-300 font-bold">Galactic Nebula</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-red-700/50 cursor-pointer">
+              <input type="checkbox" id="gene-magma" class="accent-red-500 rounded">
+              <span class="text-red-400 font-bold">Magma Molten</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-lime-700/50 cursor-pointer">
+              <input type="checkbox" id="gene-toxicacid" class="accent-lime-400 rounded">
+              <span class="text-lime-300 font-bold">Toxic Acid</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-neutral-700 cursor-pointer">
+              <input type="checkbox" id="gene-obsidian" class="accent-zinc-400 rounded">
+              <span class="text-zinc-300 font-bold">Obsidian Jet</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-cyan-600/50 cursor-pointer">
+              <input type="checkbox" id="gene-rainbowboelen" class="accent-cyan-400 rounded">
+              <span class="text-cyan-200 font-bold">Rainbow Boelen</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-pink-700/50 cursor-pointer">
+              <input type="checkbox" id="gene-cherryblossom" class="accent-pink-400 rounded">
+              <span class="text-pink-300 font-bold">Cherry Blossom</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-amber-500/50 cursor-pointer">
+              <input type="checkbox" id="gene-goldenchild" class="accent-amber-400 rounded">
+              <span class="text-amber-300 font-bold">Golden Child</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-orange-500/50 cursor-pointer">
+              <input type="checkbox" id="gene-coralglow" class="accent-orange-400 rounded">
+              <span class="text-orange-300 font-bold">Coral Glow</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 bg-neutral-950 rounded-xl border border-teal-500/50 cursor-pointer">
+              <input type="checkbox" id="gene-cybermatrix" class="accent-teal-400 rounded">
+              <span class="text-teal-300 font-bold">Cyber Matrix</span>
+            </label>
+          </div>
+
+          <button onclick="synthesizeCustomSnake()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-2xl text-xs active:scale-95 transition shadow-lg">
+            ⚡ Synthesize Snake to Rack
+          </button>
+        </div>
+
+        <!-- Factory Reset -->
+        <button onclick="resetGameSave()" class="w-full py-2 bg-rose-950/40 hover:bg-rose-950/80 text-rose-300 border border-rose-900/60 font-semibold rounded-2xl text-xs transition">
+          🗑️ Clear Local Save & Reset Game
+        </button>
+      </section>
+
+    </main>
+
+    <!-- iOS Frosted Bottom Tab Navigation -->
+    <nav class="safe-bottom absolute bottom-0 left-0 right-0 bg-neutral-950/85 backdrop-blur-xl border-t border-neutral-800/80 px-4 py-2 z-40">
+      <div class="flex justify-around items-center h-12">
+        <button onclick="switchTab('rack')" id="tab-btn-rack" class="flex flex-col items-center gap-1 text-emerald-400 active:scale-90 transition">
+          <span class="text-lg">🐍</span>
+          <span class="text-[10px] font-bold">Rack</span>
+        </button>
+        <button onclick="switchTab('breeding')" id="tab-btn-breeding" class="flex flex-col items-center gap-1 text-neutral-400 active:scale-90 transition">
+          <span class="text-lg">🧬</span>
+          <span class="text-[10px] font-bold">Breed</span>
+        </button>
+        <button onclick="switchTab('market')" id="tab-btn-market" class="flex flex-col items-center gap-1 text-neutral-400 active:scale-90 transition">
+          <span class="text-lg">🎪</span>
+          <span class="text-[10px] font-bold">Expo</span>
+        </button>
+        <button onclick="switchTab('manual')" id="tab-btn-manual" class="flex flex-col items-center gap-1 text-neutral-400 active:scale-90 transition">
+          <span class="text-lg">📖</span>
+          <span class="text-[10px] font-bold">Manual</span>
+        </button>
+        <button onclick="switchTab('god')" id="tab-btn-god" class="flex flex-col items-center gap-1 text-purple-400 active:scale-90 transition">
+          <span class="text-lg">⚡</span>
+          <span class="text-[10px] font-bold">God Mode</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- MODAL: SNAKE INSPECTOR -->
+    <div id="inspect-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-sm p-4 space-y-3 shadow-2xl relative">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="text-base font-extrabold text-white" id="inspect-title">Snake Details</h3>
+            <p class="text-[11px] text-neutral-400" id="inspect-gender-weight">Male • 1,200g • Adult</p>
+          </div>
+          <button onclick="closeInspectModal()" class="w-7 h-7 rounded-full bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center text-xs">
+            ✕
+          </button>
+        </div>
+
+        <!-- 512x512 Canvas Container -->
+        <div class="relative bg-neutral-950 border border-neutral-800/80 rounded-2xl flex flex-col items-center p-2">
+          <canvas id="inspect-canvas" width="512" height="512" class="pixel-canvas w-56 h-56 object-contain rounded-xl"></canvas>
+          <div class="flex items-center gap-2 mt-2 w-full justify-between px-2">
+            <span class="text-[10px] font-mono text-neutral-400 uppercase">Head Pose: <span id="inspect-pose-label" class="text-emerald-400 font-bold">CENTER</span></span>
+            <button onclick="cycleActiveSnakeHead()" class="px-2.5 py-1 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg text-[10px] font-bold active:scale-95 transition">
+              🔄 Turn Head
+            </button>
+          </div>
+        </div>
+
+        <!-- Genetics Badges -->
+        <div>
+          <div class="text-[10px] uppercase font-bold text-neutral-400 mb-1">Genetic Expression</div>
+          <div id="inspect-genes-container" class="flex flex-wrap gap-1"></div>
+        </div>
+
+        <!-- Floor & Vault Assignment Toggles -->
+        <div class="p-3 bg-black/50 border border-neutral-800 rounded-2xl space-y-2">
+          <div class="flex justify-between items-center">
+            <div>
+              <div class="text-xs font-bold text-white">Showroom Display Floor</div>
+              <div class="text-[10px] text-neutral-400">Put on table for Expo walk-in buyers</div>
+            </div>
+            <button id="inspect-floor-btn" onclick="toggleActiveSnakeFloor()" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition">
+              Show on Floor
+            </button>
+          </div>
+          <div class="flex justify-between items-center pt-2 border-t border-neutral-800">
+            <div>
+              <div class="text-xs font-bold text-amber-400 flex items-center gap-1">
+                <span>👑</span> Private Breeder Vault
+              </div>
+              <div class="text-[10px] text-neutral-400">Lock as prized breeder / safe from sales</div>
+            </div>
+            <button id="inspect-vault-btn" onclick="toggleActiveSnakeVault()" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition">
+              Move to Vault
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button onclick="feedActiveSnake()" id="inspect-feed-btn" class="py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white font-semibold rounded-xl text-xs border border-neutral-700 active:scale-95 transition">
+            🐭 Feed ($5)
+          </button>
+          <button onclick="sellActiveSnakeFast()" id="inspect-sell-btn" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-xs active:scale-95 transition">
+            💰 Quick Sell (<span id="inspect-sell-price">$0</span>)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-14 left-1/2 transform -translate-x-1/2 bg-neutral-900 border border-neutral-700 px-4 py-2 rounded-2xl shadow-2xl flex items-center gap-2 pointer-events-none transition-all duration-300 opacity-0 z-50">
+      <span id="toast-icon">✨</span>
+      <span id="toast-text" class="text-xs font-bold text-white">Action successful</span>
+    </div>
+
+  </div>
+
+  <!-- Game Logic & Pixel Engine -->
+  <script>
+    // Audio Synthesizer
+    let audioCtx = null;
+    let audioEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'tap') {
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.linearRampToValueAtTime(0.001, now + 0.05);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } else if (type === 'cash') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        osc.frequency.setValueAtTime(783.99, now + 0.16);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.linearRampToValueAtTime(0.001, now + 0.3);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      } else if (type === 'egg') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(260, now);
+        osc.frequency.linearRampToValueAtTime(520, now + 0.2);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.001, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('audio-toggle-btn');
+      btn.textContent = audioEnabled ? '🔊' : '🔇';
+      showToast(audioEnabled ? 'Sound Enabled' : 'Sound Muted', audioEnabled ? '🔊' : '🔇');
+    }
+
+    // GAME STATE
+    let gameState = {
+      cash: 1500,
+      rep: 100,
+      snakes: [],
+      clutches: [],
+      floorSnakeIds: [],
+      vaultSnakeIds: [],
+      autoBreedEnabled: false,
+      autoSellEnabled: false,
+      currentRackFilter: 'all',
+      activeInspectId: null,
+      activeCustomer: null,
+      activeRequests: [],
+      classifieds: []
+    };
+
+    const GENE_DEFS = {
+      'Piebald': { type: 'recessive', multiplier: 2.2, desc: 'Pure porcelain white calico belly with jagged pattern patches.' },
+      'Clown': { type: 'recessive', multiplier: 2.5, desc: 'Tear-drop eye markings with dripping dorsal pattern.' },
+      'Albino': { type: 'recessive', multiplier: 2.0, desc: 'Amelanistic snow-white base with bright yellow blotches and ruby red eyes.' },
+      'Pastel': { type: 'codom', multiplier: 1.5, desc: 'High yellow blushing and bright lime eye tone.' },
+      'Super Pastel': { type: 'codom', multiplier: 2.2, desc: 'Intense neon blushing with extreme pattern reduction.' },
+      'Spider': { type: 'dominant', multiplier: 1.4, desc: 'Intricate thin web dorsal pattern with white high flanks.' },
+      'Pinstripe': { type: 'dominant', multiplier: 1.4, desc: 'Dual dorsal golden pin-lines with lateral needle barring.' },
+      'Champagne': { type: 'dominant', multiplier: 1.6, desc: 'Silky smooth caramel fawn body with washed belly.' },
+      'Banana': { type: 'codom', multiplier: 1.8, desc: 'Lavender base with sunny yellow blotches and dark pepper freckling.' },
+      'Blue-Eyed Leucistic': { type: 'codom', multiplier: 3.2, desc: 'Pure ethereal porcelain white body with piercing blue eyes.' },
+      'Sunset': { type: 'codom', multiplier: 3.4, desc: 'Rich burnt copper body with fiery glowing amber belly.' },
+      'Panda Pied': { type: 'designer', multiplier: 4.2, desc: 'High-contrast jet black saddles over stark white porcelain scales.' },
+      'Lavender Albino': { type: 'recessive', multiplier: 3.0, desc: 'Plum lavender base with bright gold bands and ruby eyes.' },
+      'Blue Insularis': { type: 'dominant', multiplier: 3.8, desc: 'Electric turquoise-cyan body with glowing amber gem eyes.' },
+      'Gaboon Viper': { type: 'dominant', multiplier: 4.0, desc: 'Geometric buff/chocolate butterfly chevrons and snout horns.' },
+      'Axanthic': { type: 'recessive', multiplier: 2.3, desc: 'Total lack of red/yellow; sleek monochrome silver, gray, and black.' },
+      'Candy': { type: 'recessive', multiplier: 3.6, desc: 'Vibrant strawberry magenta body with rich yellow saddles and ruby eyes.' },
+      'Highway': { type: 'codom', multiplier: 3.3, desc: 'Continuous golden asphalt racing stripe along the spine.' },
+      'Ghost': { type: 'recessive', multiplier: 2.1, desc: 'Silvery translucent haze with reduced melanocytes.' },
+      'Enchi': { type: 'codom', multiplier: 1.7, desc: 'Citrus gold blushing with wide banded pattern.' },
+      'Leopard': { type: 'codom', multiplier: 2.0, desc: 'Intricate micro-spots and fragmented cheetah rosettes.' },
+      // 10 NEW ULTRA MORPHS
+      'Dragon Scale': { type: 'designer', multiplier: 4.5, desc: 'Iridescent emerald scales rimmed with molten gold and dragon eyes.' },
+      'Galactic Nebula': { type: 'designer', multiplier: 4.4, desc: 'Deep cosmic violet-indigo sprinkled with starburst nebulae.' },
+      'Magma Molten': { type: 'designer', multiplier: 4.2, desc: 'Obsidian crust fractured with glowing molten lava fissures.' },
+      'Toxic Acid': { type: 'codom', multiplier: 3.5, desc: 'Fluorescent acid lime scales with venomous chartreuse banding.' },
+      'Obsidian': { type: 'dominant', multiplier: 3.1, desc: 'Total hyper-melanistic obsidian pitch black with gunmetal shine.' },
+      'Rainbow Boelen': { type: 'dominant', multiplier: 4.8, desc: 'Midnight iridescent oil-slick with prism scale highlights.' },
+      'Cherry Blossom': { type: 'recessive', multiplier: 3.9, desc: 'Petal soft sakura pastel pink and snow-white with ruby eyes.' },
+      'Golden Child': { type: 'dominant', multiplier: 3.7, desc: 'Molten spun-gold metallic reflective sheen across chocolate scales.' },
+      'Coral Glow': { type: 'codom', multiplier: 2.8, desc: 'Warm neon apricot and lavender gradients with coral underbellies.' },
+      'Cyber Matrix': { type: 'designer', multiplier: 4.6, desc: 'High-tech mint circuit lines across charcoal-slate plates.' }
+    };
+
+    // 64x64 Square Pixel Canvas Rendering Engine
+    function renderSnakePixelArt(canvas, snake) {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+
+      const GW = 64;
+      const GH = 64;
+      const pixelSize = canvas.width / GW;
+
+      let seed = 0;
+      for (let i = 0; i < (snake.id || 'snake').length; i++) {
+        seed = (seed * 31 + snake.id.charCodeAt(i)) & 0xffffffff;
+      }
+      function rnd() {
+        seed = (seed * 1664525 + 1013904223) & 0xffffffff;
+        return (seed >>> 0) / 4294967296;
+      }
+
+      // Initialize grid with dark floor background
+      const grid = Array.from({ length: GH }, () => Array(GW).fill(null));
+      for (let y = 0; y < GH; y++) {
+        for (let x = 0; x < GW; x++) {
+          grid[y][x] = (x + y) % 2 === 0 ? '#111114' : '#0b0b0e';
+        }
+      }
+
+      function setPix(x, y, col) {
+        if (x >= 0 && x < GW && y >= 0 && y < GH && col) {
+          grid[y][x] = col;
+        }
+      }
+
+      const genes = snake.genes || [];
+      const isAlbino = genes.includes('Albino');
+      const isBanana = genes.includes('Banana');
+      const isPastel = genes.includes('Pastel') || genes.includes('Super Pastel');
+      const isPiebald = genes.includes('Piebald');
+      const isSpider = genes.includes('Spider');
+      const isPinstripe = genes.includes('Pinstripe');
+      const isChampagne = genes.includes('Champagne');
+      const isClown = genes.includes('Clown');
+      const isBlueInsularis = genes.includes('Blue Insularis');
+      const isGaboon = genes.includes('Gaboon Viper');
+      const isBEL = genes.includes('Blue-Eyed Leucistic');
+      const isSunset = genes.includes('Sunset');
+      const isPandaPied = genes.includes('Panda Pied');
+      const isLavender = genes.includes('Lavender Albino');
+      const isAxanthic = genes.includes('Axanthic');
+      const isCandy = genes.includes('Candy');
+      const isHighway = genes.includes('Highway');
+      const isGhost = genes.includes('Ghost');
+      const isEnchi = genes.includes('Enchi');
+      const isLeopard = genes.includes('Leopard');
+
+      // 10 NEW ULTRA MORPH FLAGS
+      const isDragon = genes.includes('Dragon Scale');
+      const isNebula = genes.includes('Galactic Nebula');
+      const isMagma = genes.includes('Magma Molten');
+      const isToxic = genes.includes('Toxic Acid');
+      const isObsidian = genes.includes('Obsidian');
+      const isBoelen = genes.includes('Rainbow Boelen');
+      const isCherry = genes.includes('Cherry Blossom');
+      const isGoldenChild = genes.includes('Golden Child');
+      const isCoralGlow = genes.includes('Coral Glow');
+      const isCyber = genes.includes('Cyber Matrix');
+
+      // Base Palettes
+      let colOutline = '#120b06';
+      let colBase = '#432918';
+      let colBaseLight = '#5d3b23';
+      let colPattern = '#c68b36';
+      let colPatternLight = '#e2aa52';
+      let colBelly = '#f0e6d2';
+      let colBellyShadow = '#d4c4a8';
+      let colEye = '#0f0f10';
+      let colEyeGlint = '#ffffff';
+      let colTongue = '#e11d48';
+
+      if (isDragon) {
+        colOutline = '#022c22';
+        colBase = '#065f46';
+        colBaseLight = '#047857';
+        colPattern = '#f59e0b';
+        colPatternLight = '#fbbf24';
+        colBelly = '#fef3c7';
+        colBellyShadow = '#fde68a';
+        colEye = '#ea580c';
+        colEyeGlint = '#fde047';
+        colTongue = '#f97316';
+      } else if (isNebula) {
+        colOutline = '#1e1b4b';
+        colBase = '#312e81';
+        colBaseLight = '#4338ca';
+        colPattern = '#c084fc';
+        colPatternLight = '#e879f9';
+        colBelly = '#fdf4ff';
+        colBellyShadow = '#f0abfc';
+        colEye = '#38bdf8';
+        colEyeGlint = '#ffffff';
+      } else if (isMagma) {
+        colOutline = '#18181b';
+        colBase = '#27272a';
+        colBaseLight = '#3f3f46';
+        colPattern = '#dc2626';
+        colPatternLight = '#f97316';
+        colBelly = '#ea580c';
+        colBellyShadow = '#c2410c';
+        colEye = '#facc15';
+        colEyeGlint = '#ffffff';
+        colTongue = '#ef4444';
+      } else if (isToxic) {
+        colOutline = '#14532d';
+        colBase = '#4d7c0f';
+        colBaseLight = '#65a30d';
+        colPattern = '#a3e635';
+        colPatternLight = '#bef264';
+        colBelly = '#ecfccb';
+        colBellyShadow = '#d9f99d';
+        colEye = '#84cc16';
+        colEyeGlint = '#ffffff';
+      } else if (isObsidian) {
+        colOutline = '#000000';
+        colBase = '#09090b';
+        colBaseLight = '#18181b';
+        colPattern = '#1c1917';
+        colPatternLight = '#292524';
+        colBelly = '#27272a';
+        colBellyShadow = '#18181b';
+        colEye = '#000000';
+        colEyeGlint = '#71717a';
+      } else if (isBoelen) {
+        colOutline = '#020617';
+        colBase = '#0f172a';
+        colBaseLight = '#1e293b';
+        colPattern = '#06b6d4';
+        colPatternLight = '#d946ef';
+        colBelly = '#38bdf8';
+        colBellyShadow = '#0284c7';
+        colEye = '#e879f9';
+        colEyeGlint = '#ffffff';
+      } else if (isCherry) {
+        colOutline = '#831843';
+        colBase = '#fbcfe8';
+        colBaseLight = '#fdf2f8';
+        colPattern = '#f472b6';
+        colPatternLight = '#ec4899';
+        colBelly = '#ffffff';
+        colBellyShadow = '#fce7f3';
+        colEye = '#be185d';
+        colEyeGlint = '#ffffff';
+      } else if (isGoldenChild) {
+        colOutline = '#451a03';
+        colBase = '#78350f';
+        colBaseLight = '#92400e';
+        colPattern = '#facc15';
+        colPatternLight = '#fde047';
+        colBelly = '#fef08a';
+        colBellyShadow = '#fde047';
+        colEye = '#b45309';
+        colEyeGlint = '#ffffff';
+      } else if (isCoralGlow) {
+        colOutline = '#431407';
+        colBase = '#ea580c';
+        colBaseLight = '#fb923c';
+        colPattern = '#c084fc';
+        colPatternLight = '#e879f9';
+        colBelly = '#ffedd5';
+        colBellyShadow = '#fed7aa';
+        colEye = '#c2410c';
+        colEyeGlint = '#fed7aa';
+      } else if (isCyber) {
+        colOutline = '#042f2e';
+        colBase = '#0f172a';
+        colBaseLight = '#1e293b';
+        colPattern = '#14b8a6';
+        colPatternLight = '#2dd4bf';
+        colBelly = '#99f6e4';
+        colBellyShadow = '#5eead4';
+        colEye = '#06b6d4';
+        colEyeGlint = '#ccfbf1';
+        colTongue = '#2dd4bf';
+      } else if (isBEL) {
+        colOutline = '#94a3b8';
+        colBase = '#ffffff';
+        colBaseLight = '#f8fafc';
+        colPattern = '#f1f5f9';
+        colPatternLight = '#ffffff';
+        colBelly = '#ffffff';
+        colBellyShadow = '#e2e8f0';
+        colEye = '#0284c7';
+        colEyeGlint = '#e0f2fe';
+        colTongue = '#f43f5e';
+      } else if (isCandy) {
+        colOutline = '#4a0425';
+        colBase = '#9d174d';
+        colBaseLight = '#be185d';
+        colPattern = '#facc15';
+        colPatternLight = '#fde047';
+        colBelly = '#fdf2f8';
+        colBellyShadow = '#fbcfe8';
+        colEye = '#e11d48';
+        colEyeGlint = '#fce7f3';
+      } else if (isAxanthic) {
+        colOutline = '#09090b';
+        colBase = '#27272a';
+        colBaseLight = '#3f3f46';
+        colPattern = '#a1a1aa';
+        colPatternLight = '#d4d4d8';
+        colBelly = '#f4f4f5';
+        colBellyShadow = '#cbd5e1';
+        colEye = '#18181b';
+      } else if (isHighway) {
+        colOutline = '#111827';
+        colBase = '#1f2937';
+        colBaseLight = '#374151';
+        colPattern = '#facc15';
+        colPatternLight = '#fef08a';
+        colBelly = '#f3f4f6';
+        colBellyShadow = '#d1d5db';
+      } else if (isGhost) {
+        colOutline = '#334155';
+        colBase = '#64748b';
+        colBaseLight = '#94a3b8';
+        colPattern = '#cbd5e1';
+        colPatternLight = '#e2e8f0';
+        colBelly = '#f8fafc';
+        colBellyShadow = '#cbd5e1';
+        colEye = '#475569';
+      } else if (isSunset) {
+        colOutline = '#330f0a';
+        colBase = '#9a3412';
+        colBaseLight = '#c2410c';
+        colPattern = '#ea580c';
+        colPatternLight = '#fb923c';
+        colBelly = '#fed7aa';
+        colBellyShadow = '#fdba74';
+        colEye = '#7c2d12';
+        colEyeGlint = '#ffedd5';
+      } else if (isPandaPied) {
+        colOutline = '#09090b';
+        colBase = '#18181b';
+        colBaseLight = '#27272a';
+        colPattern = '#09090b';
+        colPatternLight = '#3f3f46';
+        colBelly = '#f4f4f5';
+        colBellyShadow = '#e4e4e7';
+        colEye = '#000000';
+      } else if (isLavender) {
+        colOutline = '#3b0764';
+        colBase = '#a855f7';
+        colBaseLight = '#c084fc';
+        colPattern = '#facc15';
+        colPatternLight = '#fef08a';
+        colBelly = '#fae8ff';
+        colBellyShadow = '#f0abfc';
+        colEye = '#e11d48';
+        colEyeGlint = '#fce7f3';
+      } else if (isBlueInsularis) {
+        colOutline = '#042f2e';
+        colBase = '#0891b2';
+        colBaseLight = '#06b6d4';
+        colPattern = '#22d3ee';
+        colPatternLight = '#a5f3fc';
+        colBelly = '#cffafe';
+        colBellyShadow = '#67e8f9';
+        colEye = '#f59e0b';
+        colEyeGlint = '#fef08a';
+        colTongue = '#38bdf8';
+      } else if (isGaboon) {
+        colOutline = '#1c140e';
+        colBase = '#5c4436';
+        colBaseLight = '#785b48';
+        colPattern = '#d7b38c';
+        colPatternLight = '#ecd9c6';
+        colBelly = '#f5ede4';
+        colBellyShadow = '#dfccba';
+        colEye = '#78350f';
+        colEyeGlint = '#fef3c7';
+      } else if (isAlbino) {
+        colOutline = '#d97706';
+        colBase = '#ffffff';
+        colBaseLight = '#fef3c7';
+        colPattern = '#fbbf24';
+        colPatternLight = '#fde047';
+        colBelly = '#ffffff';
+        colBellyShadow = '#fef08a';
+        colEye = '#e11d48';
+        colEyeGlint = '#fce7f3';
+      } else if (isBanana) {
+        colOutline = '#3b2042';
+        colBase = '#8b5cf6';
+        colBaseLight = '#a78bfa';
+        colPattern = '#facc15';
+        colPatternLight = '#fef08a';
+        colBelly = '#faf5ff';
+        colBellyShadow = '#f3e8ff';
+      } else if (isPastel) {
+        colBase = '#6b4320';
+        colBaseLight = '#8b582b';
+        colPattern = '#eab308';
+        colPatternLight = '#fef08a';
+        colEye = '#65a30d';
+        colEyeGlint = '#bef264';
+      }
+
+      if (isChampagne) {
+        colPattern = colBaseLight;
+        colPatternLight = colBase;
+      }
+
+      if (isEnchi) {
+        colBaseLight = '#b45309';
+        colPattern = '#f59e0b';
+        colPatternLight = '#fcd34d';
+      }
+
+      // 1. Draw Authentic Snug Tiered Ball Python Coils (Basket / Donut Stack)
+      // Tier 1: Outer base coil ring resting on the substrate (widest foundation)
+      // Tier 2: Mid-tier overlapping wrap
+      // Tier 3: Inner body wrap forming the snug nestled center
+      for (let y = 30; y <= 59; y++) {
+        for (let x = 8; x <= 56; x++) {
+          const cx = 32;
+          const cy = 46;
+
+          // Normalized elliptical radii
+          const dx = (x - cx) / 22.0;
+          const dy = (y - cy) / 12.5;
+          const rSq = dx * dx + dy * dy;
+
+          // Layer 1: Outer massive base coil (rSq between 0.38 and 1.05)
+          const inOuterCoil = (rSq <= 1.05 && rSq >= 0.40 && y >= 34);
+
+          // Layer 2: Mid-tier anterior overlapping coil
+          const dxMid = (x - 32) / 16.5;
+          const dyMid = (y - 44) / 8.5;
+          const rMidSq = dxMid * dxMid + dyMid * dyMid;
+          const inMidCoil = (rMidSq <= 1.0 && rMidSq >= 0.22 && y >= 32);
+
+          // Layer 3: Inner wrap embracing the emerging neck
+          const dxIn = (x - 32) / 10.5;
+          const dyIn = (y - 42) / 5.5;
+          const rInSq = dxIn * dxIn + dyIn * dyIn;
+          const inInnerCoil = (rInSq <= 1.0 && rInSq >= 0.12 && y >= 35);
+
+          if (inOuterCoil || inMidCoil || inInnerCoil) {
+            // Outline boundary tests
+            const isBaseOuterEdge = (rSq > 0.94 && y >= 35) || (y === 59 && rSq <= 1.0);
+            const isMidOuterEdge = (rMidSq > 0.91 && y >= 33 && y <= 48);
+            const isInnerEdge = (rInSq < 0.18 && y >= 40);
+
+            // Crease shadow between outer ring and mid ring for coiled depth
+            const isCrease = (Math.abs(rMidSq - 0.95) < 0.08 && y >= 39 && y <= 52);
+
+            let isEdge = isBaseOuterEdge || (inMidCoil && !inOuterCoil && isMidOuterEdge) || isInnerEdge;
+
+            let col = isEdge ? colOutline : colBase;
+
+            // Shading: upper coil highlights and lower coil shading
+            if (!isEdge) {
+              if (y < 42 && rSq > 0.45) {
+                col = colBaseLight;
+              } else if (y > 52) {
+                col = colBase;
+              }
+            }
+
+            // Morph Pattern blotches across the rounded coils
+            const pVal = Math.sin(x * 0.44 + y * 0.12) * Math.cos(y * 0.48 - x * 0.1);
+            if (!isEdge && pVal > 0.16 && !isChampagne) {
+              col = (pVal > 0.45) ? colPatternLight : colPattern;
+            }
+
+            // Ventral belly scutes (visible on bottom-front underbelly and internal curve)
+            if (!isEdge) {
+              const inFrontBelly = (y >= 51 && x >= 20 && x <= 44);
+              const inLowerCrease = isCrease && (x >= 22 && x <= 42);
+              if (inFrontBelly || inLowerCrease) {
+                col = ((x + y) % 3 === 0) ? colBellyShadow : colBelly;
+              }
+            }
+
+            if (isCrease && !isEdge) {
+              col = colOutline;
+            }
+
+            setPix(x, y, col);
+          }
+        }
+      }
+
+      // Morph Details on Coils
+      if (isCyber) {
+        for (let py = 35; py <= 54; py += 3) {
+          for (let px = 10; px <= 54; px += 4) {
+            if (grid[py] && grid[py][px] && grid[py][px] !== '#111114' && grid[py][px] !== '#0b0b0e') {
+              setPix(px, py, '#2dd4bf');
+              if (grid[py + 1] && px % 8 === 0) setPix(px, py + 1, '#14b8a6');
+            }
+          }
+        }
+      }
+
+      if (isMagma) {
+        for (let py = 35; py <= 56; py += 2) {
+          for (let px = 10; px <= 54; px += 3) {
+            if (grid[py] && grid[py][px] && grid[py][px] !== '#111114' && grid[py][px] !== '#0b0b0e' && rnd() > 0.65) {
+              setPix(px, py, '#f97316');
+              setPix(px + 1, py, '#dc2626');
+            }
+          }
+        }
+      }
+
+      if (isNebula) {
+        for (let py = 34; py <= 56; py++) {
+          for (let px = 10; px <= 54; px++) {
+            if (grid[py] && grid[py][px] && grid[py][px] !== '#111114' && grid[py][px] !== '#0b0b0e' && rnd() > 0.96) {
+              setPix(px, py, '#ffffff');
+            }
+          }
+        }
+      }
+
+      if (isPinstripe) {
+        for (let py = 36; py <= 54; py += 2) {
+          if (grid[py] && grid[py][20]) grid[py][20] = '#fef08a';
+          if (grid[py] && grid[py][44]) grid[py][44] = '#fef08a';
+          if (grid[py] && grid[py][32] && py >= 46) grid[py][32] = '#fef08a';
+        }
+      }
+
+      if (isHighway) {
+        for (let py = 35; py <= 56; py++) {
+          if (grid[py] && grid[py][32]) {
+            grid[py][32] = '#fef08a';
+            if (grid[py][31]) grid[py][31] = '#facc15';
+            if (grid[py][33]) grid[py][33] = '#facc15';
+          }
+        }
+      }
+
+      if (isLeopard) {
+        for (let py = 35; py <= 54; py += 3) {
+          for (let px = 11; px <= 53; px += 4) {
+            if (grid[py] && grid[py][px] && grid[py][px] !== '#111114' && grid[py][px] !== '#0b0b0e') {
+              setPix(px, py, '#0f0702');
+              setPix(px + 1, py, colPatternLight);
+            }
+          }
+        }
+      }
+
+      if (isBanana) {
+        for (let py = 33; py < 56; py++) {
+          for (let px = 10; px < 54; px++) {
+            if ((grid[py][px] === colPattern || grid[py][px] === colBase) && rnd() > 0.94) {
+              grid[py][px] = '#1a1020';
+            }
+          }
+        }
+      }
+
+      // 2. Upright S-Curve Neck rising cleanly out of the core of the coil cluster
+      const pose = snake.pose || 'center';
+      let headCenterX = 32;
+      let headCenterY = 15;
+
+      if (pose === 'left') {
+        headCenterX = 27;
+      } else if (pose === 'right') {
+        headCenterX = 37;
+      }
+
+      const neckBaseX = 32;
+      // Neck rises seamlessly from inside the coil core (y=44) straight up to under the jaw (y=16)
+      for (let ny = 16; ny <= 44; ny++) {
+        const t = (44 - ny) / 28;
+        // Natural gentle S-curve easing towards the active head angle
+        const curveOffset = Math.sin(t * Math.PI) * (pose === 'left' ? -2.5 : pose === 'right' ? 2.5 : 0);
+        const cx = Math.round(neckBaseX + (headCenterX - neckBaseX) * t + curveOffset);
+        // Muscular tapering from base into throat
+        const w = (ny > 36) ? 4 : (ny > 26) ? 3 : (ny > 20) ? 3 : 2;
+
+        for (let nx = cx - w - 1; nx <= cx + w + 1; nx++) {
+          const isEdge = (nx === cx - w - 1 || nx === cx + w + 1);
+          let col = isEdge ? colOutline : colBase;
+          // Belly throat scale line
+          if (!isEdge && Math.abs(nx - cx) <= 1) {
+            col = (ny % 2 === 0) ? colBelly : colBellyShadow;
+          }
+          setPix(nx, ny, col);
+        }
+      }
+
+      // 3. Rounded Spade Head & Snout (seamlessly locking directly onto the throat at y=16)
+      let hx = headCenterX;
+      let hy = headCenterY;
+      const headWidth = 7;
+      const headHeight = 6;
+
+      for (let y = hy - headHeight; y <= hy + 2; y++) {
+        for (let x = hx - headWidth; x <= hx + headWidth; x++) {
+          const dx = (x - hx) / headWidth;
+          const dy = (y - (hy - 1.5)) / (headHeight + 0.5);
+          const dist = dx * dx + dy * dy;
+
+          if (dist <= 1.0) {
+            let col = (dist >= 0.8) ? colOutline : colBaseLight;
+            const p = Math.sin(x * 0.8) * Math.cos(y * 0.7);
+            if (dist < 0.8 && p > 0.2 && !isChampagne) {
+              col = colPatternLight;
+            }
+            setPix(x, y, col);
+          }
+        }
+      }
+
+      // Throat & Chin Seal: solid connection with zero gaps
+      setPix(hx - 2, hy + 2, colOutline);
+      setPix(hx + 2, hy + 2, colOutline);
+      setPix(hx - 1, hy + 2, colBelly);
+      setPix(hx, hy + 2, colBelly);
+      setPix(hx + 1, hy + 2, colBelly);
+      setPix(hx - 1, hy + 3, colBelly);
+      setPix(hx, hy + 3, colBelly);
+      setPix(hx + 1, hy + 3, colBelly);
+
+      // Heat Pits
+      setPix(hx - 4, hy - 1, colOutline);
+      setPix(hx - 2, hy - 1, colOutline);
+      setPix(hx + 2, hy - 1, colOutline);
+      setPix(hx + 4, hy - 1, colOutline);
+
+      // Eyes
+      const leftEyeX = hx - 4;
+      const rightEyeX = hx + 4;
+      const eyeY = hy - 3;
+
+      setPix(leftEyeX, eyeY, colEye);
+      setPix(leftEyeX + 1, eyeY, colEye);
+      setPix(leftEyeX, eyeY - 1, colEyeGlint);
+
+      setPix(rightEyeX, eyeY, colEye);
+      setPix(rightEyeX - 1, eyeY, colEye);
+      setPix(rightEyeX, eyeY - 1, colEyeGlint);
+
+      // Forked Tongue
+      setPix(hx, hy + 4, colTongue);
+      setPix(hx - 1, hy + 5, colTongue);
+      setPix(hx + 1, hy + 5, colTongue);
+
+      // Gaboon Snout Horns
+      if (isGaboon) {
+        setPix(hx - 2, hy - 7, '#ecd9c6');
+        setPix(hx + 2, hy - 7, '#ecd9c6');
+        setPix(hx - 2, hy - 6, '#785b48');
+        setPix(hx + 2, hy - 6, '#785b48');
+      }
+
+      // Piebald / Panda Pied Calico Overlay
+      if (isPiebald || isPandaPied) {
+        for (let y = 30; y < GH; y++) {
+          for (let x = 0; x < GW; x++) {
+            if (grid[y][x] && grid[y][x] !== '#111114' && grid[y][x] !== '#0b0b0e') {
+              const piedNoise = Math.sin(x * 0.18 + seed * 0.05) + Math.cos(y * 0.22);
+              if (piedNoise > 0.45) {
+                grid[y][x] = '#ffffff';
+                if (piedNoise < 0.55 && isPiebald) {
+                  grid[y][x] = '#d97706';
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Draw Grid to Canvas
+      for (let y = 0; y < GH; y++) {
+        for (let x = 0; x < GW; x++) {
+          ctx.fillStyle = grid[y][x];
+          ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+        }
+      }
+    }
+
+    // STATE INITIALIZATION & STORAGE
+    function loadSavedState() {
+      const saved = localStorage.getItem('bp_tycoon_save');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          gameState = { ...gameState, ...parsed };
+          return;
+        } catch (e) {
+          console.error('Failed to parse save', e);
+        }
+      }
+
+      // Default Vibrant Starter Trio
+      gameState.snakes = [
+        {
+          id: 'starter_1',
+          name: 'Buttercup',
+          genes: ['Banana', 'Pastel'],
+          hets: [],
+          gender: 'female',
+          weight: 1250,
+          age: 'Adult',
+          value: 480,
+          pose: 'center'
+        },
+        {
+          id: 'starter_2',
+          name: 'Patchwork',
+          genes: ['Piebald'],
+          hets: [],
+          gender: 'male',
+          weight: 950,
+          age: 'Adult',
+          value: 420,
+          pose: 'right'
+        },
+        {
+          id: 'starter_3',
+          name: 'Cobalt',
+          genes: ['Blue Insularis'],
+          hets: [],
+          gender: 'male',
+          weight: 700,
+          age: 'Adult',
+          value: 1200,
+          pose: 'left'
+        }
+      ];
+      gameState.vaultSnakeIds = ['starter_1'];
+      gameState.floorSnakeIds = ['starter_2', 'starter_3'];
+    }
+
+    function saveState() {
+      localStorage.setItem('bp_tycoon_save', JSON.stringify(gameState));
+    }
+
+    function showToast(text, icon = '✨') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-icon').textContent = icon;
+      document.getElementById('toast-text').textContent = text;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2000);
+    }
+
+    // TOP BAR & TAB CONTROLS
+    function updateTopBar() {
+      document.getElementById('cash-display').textContent = `$${gameState.cash.toLocaleString()}`;
+      document.getElementById('rep-display').textContent = `★ ${gameState.rep}`;
+      document.getElementById('rack-count').textContent = `(${gameState.snakes.length})`;
+      const floorCountEl = document.getElementById('floor-count');
+      if (floorCountEl) floorCountEl.textContent = (gameState.floorSnakeIds || []).length;
+      const vaultCountEl = document.getElementById('vault-count');
+      if (vaultCountEl) vaultCountEl.textContent = (gameState.vaultSnakeIds || []).length;
+      saveState();
+    }
+
+    function switchTab(tabId) {
+      playSound('tap');
+      ['rack', 'breeding', 'market', 'manual', 'god'].forEach(t => {
+        const sec = document.getElementById(`tab-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (sec && btn) {
+          if (t === tabId) {
+            sec.classList.remove('hidden');
+            btn.className = `flex flex-col items-center gap-1 active:scale-90 transition ${t === 'god' ? 'text-purple-400' : 'text-emerald-400'}`;
+          } else {
+            sec.classList.add('hidden');
+            btn.className = 'flex flex-col items-center gap-1 text-neutral-400 active:scale-90 transition';
+          }
+        }
+      });
+
+      if (tabId === 'rack') renderRack();
+      if (tabId === 'breeding') renderBreedingTab();
+      if (tabId === 'market') renderMarketTab();
+      if (tabId === 'manual') renderManualTab();
+    }
+
+    // RACK & VAULT SYSTEM
+    function setRackView(mode) {
+      playSound('tap');
+      gameState.currentRackFilter = mode;
+      const allBtn = document.getElementById('rack-view-all-btn');
+      const vaultBtn = document.getElementById('rack-view-vault-btn');
+      const hint = document.getElementById('rack-view-hint');
+
+      if (mode === 'vault') {
+        allBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold text-neutral-400 hover:text-white border border-transparent transition';
+        vaultBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/50 shadow-sm transition flex items-center gap-1';
+        hint.textContent = '👑 Personal Breeder Vault: Protected holdbacks locked away from sales.';
+      } else {
+        allBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-neutral-800 text-white border border-neutral-700 transition';
+        vaultBtn.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold text-amber-400/80 hover:text-amber-300 border border-transparent transition flex items-center gap-1';
+        hint.textContent = 'Tap any snake to inspect genes, change head pose, put on the sales floor, or move into your private vault.';
+      }
+      renderRack();
+    }
+
+    function renderRack() {
+      const grid = document.getElementById('snakes-grid');
+      grid.innerHTML = '';
+
+      if (!gameState.vaultSnakeIds) gameState.vaultSnakeIds = [];
+      if (!gameState.floorSnakeIds) gameState.floorSnakeIds = [];
+
+      let list = gameState.snakes;
+      if (gameState.currentRackFilter === 'vault') {
+        list = gameState.snakes.filter(s => gameState.vaultSnakeIds.includes(s.id));
+      }
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-2 text-center py-12 text-neutral-500 text-xs">
+            ${gameState.currentRackFilter === 'vault' ? '👑 No snakes in your Private Vault.<br>Inspect any breeder and tap "Move to Vault".' : 'Your breeding rack is empty.<br>Buy stock at the Expo or synthesize in God Mode!'}
+          </div>
+        `;
+        updateTopBar();
+        return;
+      }
+
+      list.forEach(snake => {
+        const card = document.createElement('div');
+        const isVault = gameState.vaultSnakeIds.includes(snake.id);
+        const isOnFloor = gameState.floorSnakeIds.includes(snake.id);
+
+        let border = 'border-neutral-800 hover:border-neutral-700';
+        if (isVault) {
+          border = 'border-amber-500/70 bg-gradient-to-b from-neutral-900 to-amber-950/20 shadow-amber-500/10';
+        } else if (isOnFloor) {
+          border = 'border-amber-500/60 shadow-amber-500/10';
+        }
+
+        card.className = `relative bg-neutral-900 border ${border} rounded-3xl p-3 flex flex-col items-center cursor-pointer active:scale-95 transition shadow-sm`;
+        card.onclick = () => openInspectModal(snake.id);
+
+        if (isVault) {
+          const b = document.createElement('div');
+          b.className = 'absolute top-2 left-2 px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9px] font-bold flex items-center gap-1';
+          b.innerHTML = '<span>👑</span> VAULT';
+          card.appendChild(b);
+        }
+
+        if (isOnFloor) {
+          const b = document.createElement('div');
+          b.className = 'absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[9px] font-bold';
+          b.textContent = 'FLOOR';
+          card.appendChild(b);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        canvas.className = 'pixel-canvas w-28 h-28 object-contain rounded-2xl bg-neutral-950 mb-2';
+
+        const name = document.createElement('h4');
+        name.className = 'text-xs font-bold text-white text-center truncate w-full';
+        name.textContent = snake.name;
+
+        const info = document.createElement('div');
+        info.className = 'flex items-center gap-1.5 text-[10px] text-neutral-400 mt-0.5';
+        info.innerHTML = `
+          <span class="${snake.gender === 'male' ? 'text-blue-400' : 'text-rose-400'} font-bold">
+            ${snake.gender === 'male' ? '♂' : '♀'}
+          </span>
+          <span>${snake.weight}g</span> • <span>$${snake.value}</span>
+        `;
+
+        card.appendChild(canvas);
+        card.appendChild(name);
+        card.appendChild(info);
+        grid.appendChild(card);
+
+        renderSnakePixelArt(canvas, snake);
+      });
+      updateTopBar();
+    }
+
+    function feedAllSnakes() {
+      const cost = gameState.snakes.length * 5;
+      if (gameState.cash < cost) {
+        showToast('Not enough cash to feed everyone!', '🐭');
+        return;
+      }
+      gameState.cash -= cost;
+      gameState.snakes.forEach(s => {
+        s.weight += Math.round(15 + Math.random() * 20);
+        if (s.weight >= 600 && s.gender === 'male') s.age = 'Adult';
+        if (s.weight >= 1200 && s.gender === 'female') s.age = 'Adult';
+      });
+      playSound('cash');
+      showToast(`Fed ${gameState.snakes.length} snakes (-$${cost})`, '🐭');
+      renderRack();
+      updateTopBar();
+    }
+
+    // INSPECTION MODAL
+    function openInspectModal(snakeId) {
+      playSound('tap');
+      gameState.activeInspectId = snakeId;
+      const snake = gameState.snakes.find(s => s.id === snakeId);
+      if (!snake) return;
+
+      document.getElementById('inspect-title').textContent = snake.name;
+      document.getElementById('inspect-gender-weight').innerHTML = `
+        <span class="${snake.gender === 'male' ? 'text-blue-400' : 'text-rose-400'} font-bold uppercase">
+          ${snake.gender === 'male' ? '♂ Male' : '♀ Female'}
+        </span> • ${snake.weight}g • ${snake.age}
+      `;
+      document.getElementById('inspect-pose-label').textContent = (snake.pose || 'center').toUpperCase();
+      document.getElementById('inspect-sell-price').textContent = `$${snake.value}`;
+
+      const genesContainer = document.getElementById('inspect-genes-container');
+      genesContainer.innerHTML = '';
+      if (snake.genes.length === 0) {
+        genesContainer.innerHTML = `<span class="text-[11px] text-neutral-400">Normal (Wild Type)</span>`;
+      } else {
+        snake.genes.forEach(g => {
+          const badge = document.createElement('span');
+          badge.className = 'text-[11px] px-2 py-0.5 bg-neutral-800 text-neutral-200 border border-neutral-700 rounded-md font-semibold';
+          badge.textContent = g;
+          genesContainer.appendChild(badge);
+        });
+      }
+      snake.hets.forEach(h => {
+        const badge = document.createElement('span');
+        badge.className = 'text-[11px] px-2 py-0.5 bg-amber-950/60 text-amber-300 border border-amber-800/40 rounded-md font-semibold';
+        badge.textContent = `100% Het ${h}`;
+        genesContainer.appendChild(badge);
+      });
+
+      updateInspectFloorButton();
+      updateInspectVaultButton();
+
+      const canvas = document.getElementById('inspect-canvas');
+      renderSnakePixelArt(canvas, snake);
+      document.getElementById('inspect-modal').classList.remove('hidden');
+    }
+
+    function closeInspectModal() {
+      playSound('tap');
+      document.getElementById('inspect-modal').classList.add('hidden');
+      gameState.activeInspectId = null;
+    }
+
+    function cycleActiveSnakeHead() {
+      if (!gameState.activeInspectId) return;
+      const snake = gameState.snakes.find(s => s.id === gameState.activeInspectId);
+      if (!snake) return;
+      playSound('tap');
+
+      const poses = ['center', 'left', 'right'];
+      const curIdx = poses.indexOf(snake.pose || 'center');
+      snake.pose = poses[(curIdx + 1) % poses.length];
+
+      document.getElementById('inspect-pose-label').textContent = snake.pose.toUpperCase();
+      const canvas = document.getElementById('inspect-canvas');
+      renderSnakePixelArt(canvas, snake);
+      renderRack();
+      saveState();
+    }
+
+    function toggleActiveSnakeFloor() {
+      if (!gameState.activeInspectId) return;
+      if (!gameState.floorSnakeIds) gameState.floorSnakeIds = [];
+      playSound('tap');
+
+      const idx = gameState.floorSnakeIds.indexOf(gameState.activeInspectId);
+      if (idx > -1) {
+        gameState.floorSnakeIds.splice(idx, 1);
+        showToast('Removed from Showroom Floor', '🎪');
+      } else {
+        if (gameState.floorSnakeIds.length >= 4) {
+          showToast('Floor display is full! Max 4 tables.', '⚠️');
+          return;
+        }
+        gameState.floorSnakeIds.push(gameState.activeInspectId);
+        showToast('Assigned to Showroom Floor!', '🎪');
+      }
+      updateInspectFloorButton();
+      renderRack();
+      renderFloor();
+      updateTopBar();
+    }
+
+    function updateInspectFloorButton() {
+      const btn = document.getElementById('inspect-floor-btn');
+      if (!btn) return;
+      const isOnFloor = (gameState.floorSnakeIds || []).includes(gameState.activeInspectId);
+      if (isOnFloor) {
+        btn.textContent = 'Remove Floor';
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/50 hover:bg-amber-500/30 transition';
+      } else {
+        btn.textContent = 'Show on Floor';
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-neutral-800 text-neutral-200 border border-neutral-700 hover:bg-neutral-700 transition';
+      }
+    }
+
+    function toggleActiveSnakeVault() {
+      if (!gameState.activeInspectId) return;
+      if (!gameState.vaultSnakeIds) gameState.vaultSnakeIds = [];
+      playSound('tap');
+
+      const idx = gameState.vaultSnakeIds.indexOf(gameState.activeInspectId);
+      if (idx > -1) {
+        gameState.vaultSnakeIds.splice(idx, 1);
+        showToast('Released from Private Vault.', '🔓');
+      } else {
+        gameState.vaultSnakeIds.push(gameState.activeInspectId);
+        showToast('Locked into Private Breeder Vault! 👑', '👑');
+      }
+      updateInspectVaultButton();
+      renderRack();
+      updateTopBar();
+    }
+
+    // AUTOMATION TOGGLES & LOGIC
+    function toggleAutoBreeder() {
+      const toggle = document.getElementById('toggle-auto-breed');
+      gameState.autoBreedEnabled = toggle ? toggle.checked : false;
+      showToast(gameState.autoBreedEnabled ? 'Auto-Breeder Activated! 🤖' : 'Auto-Breeder Paused.', '🧬');
+      saveState();
+    }
+
+    function toggleAutoSell() {
+      const toggle = document.getElementById('toggle-auto-sell');
+      gameState.autoSellEnabled = toggle ? toggle.checked : false;
+      showToast(gameState.autoSellEnabled ? 'Auto-Liquidator Active! 📉' : 'Auto-Liquidator Disabled.', '⚡');
+      saveState();
+    }
+
+    function sellLowestValueSnake() {
+      const nonVault = gameState.snakes.filter(s => !(gameState.vaultSnakeIds || []).includes(s.id));
+      if (nonVault.length === 0) {
+        showToast('No non-vault snakes to sell!', '⚠️');
+        return;
+      }
+
+      // Sort ascending by value
+      nonVault.sort((a, b) => a.value - b.value);
+      const lowest = nonVault[0];
+
+      const idx = gameState.snakes.findIndex(s => s.id === lowest.id);
+      if (idx === -1) return;
+
+      gameState.cash += lowest.value;
+      gameState.rep += 3;
+      gameState.snakes.splice(idx, 1);
+      if (gameState.floorSnakeIds) {
+        gameState.floorSnakeIds = gameState.floorSnakeIds.filter(id => id !== lowest.id);
+      }
+
+      playSound('cash');
+      showToast(`Sold lowest value: ${lowest.name} (+$${lowest.value})`, '📉');
+      renderRack();
+      renderFloor();
+      updateTopBar();
+    }
+
+    function runAutoBreederCycle() {
+      if (!gameState.autoBreedEnabled) return;
+
+      // 1. Auto-hatch ready clutches
+      const readyClutch = gameState.clutches.find(c => c.progress >= c.maxProgress);
+      if (readyClutch) {
+        hatchClutch(readyClutch.id);
+      }
+
+      // 2. Auto-pair ready adults if under rack max & incubator has room
+      if (gameState.clutches.length < 3 && gameState.cash >= 80) {
+        const eligibleMales = gameState.snakes.filter(s => s.gender === 'male' && s.weight >= 600);
+        const eligibleFemales = gameState.snakes.filter(s => s.gender === 'female' && s.weight >= 1200);
+
+        if (eligibleMales.length > 0 && eligibleFemales.length > 0) {
+          const sire = eligibleMales[Math.floor(Math.random() * eligibleMales.length)];
+          const dam = eligibleFemales[Math.floor(Math.random() * eligibleFemales.length)];
+
+          gameState.cash -= 80;
+          const eggCount = Math.floor(4 + Math.random() * 4);
+          gameState.clutches.push({
+            id: 'clutch_' + Date.now(),
+            sireName: sire.name,
+            damName: dam.name,
+            sireGenes: [...sire.genes],
+            damGenes: [...dam.genes],
+            sireHets: [...sire.hets],
+            damHets: [...dam.hets],
+            eggs: eggCount,
+            progress: 0,
+            maxProgress: 45
+          });
+          renderClutches();
+          updateTopBar();
+        }
+      }
+    }
+
+    function runAutoSellCycle() {
+      if (!gameState.autoSellEnabled) return;
+      // Only liquidate if rack exceeds 8 snakes to prevent emptying your setup
+      if (gameState.snakes.length > 8) {
+        sellLowestValueSnake();
+      }
+    }
+
+    function updateInspectVaultButton() {
+      const btn = document.getElementById('inspect-vault-btn');
+      const sellBtn = document.getElementById('inspect-sell-btn');
+      if (!btn) return;
+      const isVault = (gameState.vaultSnakeIds || []).includes(gameState.activeInspectId);
+      if (isVault) {
+        btn.textContent = 'Remove Vault';
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/50 hover:bg-amber-500/30 transition';
+        if (sellBtn) {
+          sellBtn.disabled = true;
+          sellBtn.className = 'py-2.5 bg-neutral-800 text-neutral-500 font-semibold rounded-xl text-xs border border-neutral-700 cursor-not-allowed';
+          sellBtn.title = 'Vault holdbacks are protected from selling.';
+        }
+      } else {
+        btn.textContent = 'Move to Vault';
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-neutral-800 text-neutral-200 border border-neutral-700 hover:bg-neutral-700 transition';
+        if (sellBtn) {
+          sellBtn.disabled = false;
+          sellBtn.className = 'py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-xs active:scale-95 transition';
+        }
+      }
+    }
+
+    function feedActiveSnake() {
+      if (!gameState.activeInspectId) return;
+      if (gameState.cash < 5) {
+        showToast('Need $5 to buy a rodent!', '🐭');
+        return;
+      }
+      const snake = gameState.snakes.find(s => s.id === gameState.activeInspectId);
+      if (!snake) return;
+
+      gameState.cash -= 5;
+      snake.weight += Math.round(20 + Math.random() * 25);
+      if (snake.weight >= 600 && snake.gender === 'male') snake.age = 'Adult';
+      if (snake.weight >= 1200 && snake.gender === 'female') snake.age = 'Adult';
+
+      playSound('cash');
+      showToast(`${snake.name} fed (+30g)`, '🐭');
+      openInspectModal(snake.id);
+      renderRack();
+      updateTopBar();
+    }
+
+    function sellActiveSnakeFast() {
+      if (!gameState.activeInspectId) return;
+      const isVault = (gameState.vaultSnakeIds || []).includes(gameState.activeInspectId);
+      if (isVault) {
+        showToast('Snake is locked in your Vault! Release it first.', '👑');
+        return;
+      }
+      const idx = gameState.snakes.findIndex(s => s.id === gameState.activeInspectId);
+      if (idx === -1) return;
+
+      const snake = gameState.snakes[idx];
+      gameState.cash += snake.value;
+      gameState.rep += 5;
+      gameState.snakes.splice(idx, 1);
+      if (gameState.floorSnakeIds) {
+        gameState.floorSnakeIds = gameState.floorSnakeIds.filter(id => id !== snake.id);
+      }
+
+      playSound('cash');
+      showToast(`Sold ${snake.name} for +$${snake.value}!`, '💰');
+      closeInspectModal();
+      renderRack();
+      renderFloor();
+      updateTopBar();
+    }
+
+    // BREEDING & INCUBATOR TAB
+    function renderBreedingTab() {
+      const selectSire = document.getElementById('select-sire');
+      const selectDam = document.getElementById('select-dam');
+      selectSire.innerHTML = '<option value="">Choose Male...</option>';
+      selectDam.innerHTML = '<option value="">Choose Female...</option>';
+
+      gameState.snakes.filter(s => s.gender === 'male').forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = `${m.name} (${m.genes.join('+') || 'Normal'}) - ${m.weight}g`;
+        selectSire.appendChild(opt);
+      });
+
+      gameState.snakes.filter(s => s.gender === 'female').forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f.id;
+        opt.textContent = `${f.name} (${f.genes.join('+') || 'Normal'}) - ${f.weight}g`;
+        selectDam.appendChild(opt);
+      });
+
+      updatePairingPreview();
+      renderClutches();
+    }
+
+    function updatePairingPreview() {
+      const sireId = document.getElementById('select-sire').value;
+      const damId = document.getElementById('select-dam').value;
+      const sire = gameState.snakes.find(s => s.id === sireId);
+      const dam = gameState.snakes.find(s => s.id === damId);
+
+      document.getElementById('sire-info').textContent = sire ? `${sire.weight}g • ${sire.weight >= 600 ? '✅ Ready' : '❌ Underweight'}` : '-';
+      document.getElementById('dam-info').textContent = dam ? `${dam.weight}g • ${dam.weight >= 1200 ? '✅ Ready' : '❌ Underweight'}` : '-';
+    }
+
+    function attemptPairing() {
+      const sireId = document.getElementById('select-sire').value;
+      const damId = document.getElementById('select-dam').value;
+      const sire = gameState.snakes.find(s => s.id === sireId);
+      const dam = gameState.snakes.find(s => s.id === damId);
+
+      if (!sire || !dam) {
+        showToast('Select both a Sire and Dam.', '⚠️');
+        return;
+      }
+      if (sire.weight < 600) {
+        showToast('Sire must be at least 600g to breed!', '⚠️');
+        return;
+      }
+      if (dam.weight < 1200) {
+        showToast('Dam must be at least 1,200g to safely lay eggs!', '⚠️');
+        return;
+      }
+      if (gameState.cash < 80) {
+        showToast('Need $80 pairing fee!', '💸');
+        return;
+      }
+
+      gameState.cash -= 80;
+      playSound('egg');
+
+      // Create Clutch
+      const eggCount = Math.floor(4 + Math.random() * 4);
+      const clutch = {
+        id: 'clutch_' + Date.now(),
+        sireName: sire.name,
+        damName: dam.name,
+        sireGenes: [...sire.genes],
+        damGenes: [...dam.genes],
+        sireHets: [...sire.hets],
+        damHets: [...dam.hets],
+        eggs: eggCount,
+        progress: 0,
+        maxProgress: 45 // 45 seconds incubation
+      };
+
+      gameState.clutches.push(clutch);
+      showToast(`Successful lock! Clutch of ${eggCount} eggs incubating.`, '🥚');
+      renderClutches();
+      updateTopBar();
+    }
+
+    function renderClutches() {
+      const list = document.getElementById('clutches-list');
+      list.innerHTML = '';
+      document.getElementById('incubator-count').textContent = `${gameState.clutches.length} Active Clutches`;
+
+      if (gameState.clutches.length === 0) {
+        list.innerHTML = `<div class="text-xs text-neutral-500 text-center py-4">Incubator currently empty. Pair a clutch above!</div>`;
+        return;
+      }
+
+      gameState.clutches.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'p-3 bg-neutral-950/80 rounded-2xl border border-neutral-800 space-y-2';
+
+        const pct = Math.min(100, Math.round((c.progress / c.maxProgress) * 100));
+        const ready = c.progress >= c.maxProgress;
+
+        item.innerHTML = `
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-white flex items-center gap-1.5">
+              <span>🥚</span> ${c.sireName} × ${c.damName}
+            </span>
+            <span class="text-neutral-400 font-mono">${c.eggs} Eggs</span>
+          </div>
+          <div class="w-full bg-neutral-900 h-2 rounded-full overflow-hidden border border-neutral-800">
+            <div class="bg-amber-400 h-full transition-all duration-300" style="width: ${pct}%"></div>
+          </div>
+          <div class="flex justify-between items-center pt-1">
+            <span class="text-[10px] text-neutral-400">${ready ? 'Eggs pipped! Ready to hatch.' : `Incubating: ${pct}%`}</span>
+            ${ready ? `
+              <button onclick="hatchClutch('${c.id}')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition">
+                🐣 Hatch Neonates
+              </button>
+            ` : `
+              <button onclick="candleClutch('${c.id}')" class="px-2 py-0.5 bg-neutral-800 text-neutral-300 rounded-lg text-[10px]">
+                🕯️ Candle
+              </button>
+            `}
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function candleClutch(clutchId) {
+      playSound('tap');
+      showToast('Veins visible! Healthy embryos developing.', '🕯️');
+    }
+
+    function hatchClutch(clutchId) {
+      const idx = gameState.clutches.findIndex(c => c.id === clutchId);
+      if (idx === -1) return;
+      const c = gameState.clutches[idx];
+
+      playSound('egg');
+      const hatchlings = [];
+
+      for (let i = 0; i < c.eggs; i++) {
+        const genes = [];
+        const hets = [];
+
+        // Combine parent gene pools using Mendelian odds
+        const pool = [...new Set([...c.sireGenes, ...c.damGenes])];
+        pool.forEach(gene => {
+          const sHas = c.sireGenes.includes(gene);
+          const dHas = c.damGenes.includes(gene);
+          const def = GENE_DEFS[gene];
+
+          if (def && def.type === 'recessive') {
+            if (sHas && dHas) {
+              genes.push(gene);
+            } else if (sHas || dHas) {
+              if (Math.random() < 0.5) genes.push(gene);
+              else hets.push(gene);
+            }
+          } else {
+            // Dominant / Codom
+            if (Math.random() < 0.55) {
+              genes.push(gene);
+            }
+          }
+        });
+
+        // Determine value
+        let val = 120;
+        genes.forEach(g => {
+          if (GENE_DEFS[g]) val = Math.round(val * GENE_DEFS[g].multiplier);
+        });
+
+        const neonate = {
+          id: 'snake_' + Date.now() + '_' + i,
+          name: `${genes[0] || 'Normal'} Hatchling #${i + 1}`,
+          genes: genes,
+          hets: hets,
+          gender: Math.random() < 0.5 ? 'male' : 'female',
+          weight: Math.round(55 + Math.random() * 20),
+          age: 'Neonate',
+          value: val,
+          pose: ['center', 'left', 'right'][Math.floor(Math.random() * 3)]
+        };
+        hatchlings.push(neonate);
+        gameState.snakes.push(neonate);
+      }
+
+      gameState.clutches.splice(idx, 1);
+      showToast(`Hatched ${hatchlings.length} neonates into rack!`, '🐣');
+      renderClutches();
+      renderRack();
+      updateTopBar();
+    }
+
+    // EXPO MARKET, SHOWROOM FLOOR & REQUESTS
+    function renderMarketTab() {
+      renderFloor();
+      renderRequests();
+      renderClassifieds();
+      if (!gameState.activeCustomer) summonNewCustomer();
+    }
+
+    function renderFloor() {
+      const grid = document.getElementById('floor-grid');
+      grid.innerHTML = '';
+      if (!gameState.floorSnakeIds) gameState.floorSnakeIds = [];
+
+      document.getElementById('floor-count').textContent = gameState.floorSnakeIds.length;
+
+      for (let i = 0; i < 4; i++) {
+        const snakeId = gameState.floorSnakeIds[i];
+        const snake = snakeId ? gameState.snakes.find(s => s.id === snakeId) : null;
+
+        const table = document.createElement('div');
+        table.className = 'p-3 bg-neutral-950/70 border border-neutral-800 rounded-2xl flex flex-col items-center justify-center relative min-h-[140px]';
+
+        if (snake) {
+          const canvas = document.createElement('canvas');
+          canvas.width = 512;
+          canvas.height = 512;
+          canvas.className = 'pixel-canvas w-20 h-20 object-contain rounded-xl bg-neutral-950 mb-1';
+
+          table.innerHTML = `
+            <button onclick="removeSnakeFromFloor('${snake.id}')" class="absolute top-1.5 right-1.5 w-5 h-5 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 rounded-full text-[10px] flex items-center justify-center">✕</button>
+            <div class="text-[9px] font-bold text-amber-400 mb-1">TABLE ${i + 1}</div>
+          `;
+          table.appendChild(canvas);
+          table.innerHTML += `
+            <div class="text-[11px] font-bold text-white text-center truncate w-full mt-1">${snake.name}</div>
+            <div class="text-[10px] text-emerald-400 font-bold">$${Math.round(snake.value * 1.25)} (Expo Price)</div>
+          `;
+          grid.appendChild(table);
+          renderSnakePixelArt(canvas, snake);
+        } else {
+          table.innerHTML = `
+            <span class="text-neutral-600 text-lg mb-1">📦</span>
+            <div class="text-[10px] text-neutral-400 font-semibold">Table ${i + 1} Empty</div>
+            <div class="text-[9px] text-neutral-600 mt-1">Assign in Rack</div>
+          `;
+          grid.appendChild(table);
+        }
+      }
+    }
+
+    function removeSnakeFromFloor(snakeId) {
+      playSound('tap');
+      gameState.floorSnakeIds = gameState.floorSnakeIds.filter(id => id !== snakeId);
+      showToast('Removed from display table.', '🎪');
+      renderFloor();
+      renderRack();
+      updateTopBar();
+    }
+
+    const CUSTOMER_ARCHETYPES = [
+      { type: 'Pet Owner', name: 'Sophie (Pet Lover)', quote: '"I want a docile, beautiful companion snake for my desktop vivarium!"', budgetMult: 1.15, pref: 'any' },
+      { type: 'Designer Collector', name: 'Julian (Morph Connoisseur)', quote: '"I am strictly hunting high-end visuals, Blue Insularis, or complex combos."', budgetMult: 1.5, pref: 'rare' },
+      { type: 'Bargain Flipper', name: 'Marcus (Reptile Reseller)', quote: '"Got any wholesale neonates or cheap het projects I can flip?"', budgetMult: 0.85, pref: 'cheap' },
+      { type: 'Oddity Hunter', name: 'Dr. Vance (Herpetologist)', quote: '"I am seeking Gaboon Viper geometric genes or rare recs for a project."', budgetMult: 1.8, pref: 'oddity' }
+    ];
+
+    function summonNewCustomer() {
+      playSound('tap');
+      const arch = CUSTOMER_ARCHETYPES[Math.floor(Math.random() * CUSTOMER_ARCHETYPES.length)];
+      gameState.activeCustomer = arch;
+
+      document.getElementById('customer-name').textContent = arch.name;
+      document.getElementById('customer-type-badge').textContent = arch.type;
+      document.getElementById('customer-quote').textContent = arch.quote;
+
+      // Select target snake from floor first, then general rack
+      let candidate = null;
+      if (gameState.floorSnakeIds.length > 0) {
+        const floorSnakes = gameState.snakes.filter(s => gameState.floorSnakeIds.includes(s.id));
+        candidate = floorSnakes[Math.floor(Math.random() * floorSnakes.length)];
+      } else {
+        const nonVault = gameState.snakes.filter(s => !(gameState.vaultSnakeIds || []).includes(s.id));
+        if (nonVault.length > 0) candidate = nonVault[Math.floor(Math.random() * nonVault.length)];
+      }
+
+      const dealBox = document.getElementById('customer-deal-box');
+      if (candidate) {
+        const offer = Math.round(candidate.value * arch.budgetMult * (gameState.floorSnakeIds.includes(candidate.id) ? 1.25 : 1.0));
+        gameState.currentCustomerDeal = { snake: candidate, offer: offer };
+
+        document.getElementById('customer-target-name').textContent = candidate.name;
+        document.getElementById('customer-offer-val').textContent = `$${offer.toLocaleString()}`;
+        dealBox.classList.remove('hidden');
+      } else {
+        dealBox.classList.add('hidden');
+        gameState.currentCustomerDeal = null;
+      }
+    }
+
+    function acceptCustomerOffer() {
+      if (!gameState.currentCustomerDeal) return;
+      const { snake, offer } = gameState.currentCustomerDeal;
+
+      gameState.cash += offer;
+      gameState.rep += 8;
+      gameState.snakes = gameState.snakes.filter(s => s.id !== snake.id);
+      gameState.floorSnakeIds = (gameState.floorSnakeIds || []).filter(id => id !== snake.id);
+
+      playSound('cash');
+      showToast(`Deal closed! Sold ${snake.name} for +$${offer}`, '💰');
+      summonNewCustomer();
+      renderRack();
+      renderFloor();
+      updateTopBar();
+    }
+
+    function haggleCustomerOffer() {
+      if (!gameState.currentCustomerDeal) return;
+      if (Math.random() < 0.6) {
+        // Successful haggle
+        gameState.currentCustomerDeal.offer = Math.round(gameState.currentCustomerDeal.offer * 1.2);
+        document.getElementById('customer-offer-val').textContent = `$${gameState.currentCustomerDeal.offer.toLocaleString()}`;
+        playSound('cash');
+        showToast('Haggle successful! Customer agreed to higher price.', '🤝');
+      } else {
+        playSound('tap');
+        showToast('Customer walked away from the negotiation!', '🚪');
+        summonNewCustomer();
+      }
+    }
+
+    function rejectCustomerDeal() {
+      playSound('tap');
+      summonNewCustomer();
+    }
+
+    function renderRequests() {
+      const list = document.getElementById('requests-list');
+      list.innerHTML = '';
+
+      if (!gameState.activeRequests || gameState.activeRequests.length === 0) {
+        gameState.activeRequests = [
+          { id: 'req_1', client: 'Denver Herp Society', targetGene: 'Piebald', minWeight: 400, reward: 750 },
+          { id: 'req_2', client: 'Exotic BioLab', targetGene: 'Blue Insularis', minWeight: 200, reward: 1950 },
+          { id: 'req_3', client: 'Apex Reptiles', targetGene: 'Gaboon Viper', minWeight: 500, reward: 2200 }
+        ];
+      }
+
+      gameState.activeRequests.forEach(req => {
+        const row = document.createElement('div');
+        row.className = 'p-3 bg-neutral-950/80 rounded-2xl border border-neutral-800 flex justify-between items-center text-xs';
+
+        // Check if user has qualifying snake
+        const qual = gameState.snakes.find(s => s.genes.includes(req.targetGene) && s.weight >= req.minWeight && !(gameState.vaultSnakeIds || []).includes(s.id));
+
+        row.innerHTML = `
+          <div>
+            <div class="font-bold text-white">${req.client}</div>
+            <div class="text-[10px] text-neutral-400">Needs: <span class="text-amber-400 font-semibold">${req.targetGene}</span> (${req.minWeight}g+)</div>
+            <div class="text-xs text-emerald-400 font-bold mt-0.5">Bounty: $${req.reward}</div>
+          </div>
+          <div>
+            ${qual ? `
+              <button onclick="fulfillRequest('${req.id}', '${qual.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition">
+                Fulfill (${qual.name})
+              </button>
+            ` : `
+              <span class="text-[10px] text-neutral-500 italic">No Match</span>
+            `}
+          </div>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function fulfillRequest(reqId, snakeId) {
+      const rIdx = gameState.activeRequests.findIndex(r => r.id === reqId);
+      const sIdx = gameState.snakes.findIndex(s => s.id === snakeId);
+      if (rIdx === -1 || sIdx === -1) return;
+
+      const req = gameState.activeRequests[rIdx];
+      const snake = gameState.snakes[sIdx];
+
+      gameState.cash += req.reward;
+      gameState.rep += 15;
+      gameState.snakes.splice(sIdx, 1);
+      gameState.floorSnakeIds = (gameState.floorSnakeIds || []).filter(id => id !== snakeId);
+      gameState.activeRequests.splice(rIdx, 1);
+
+      playSound('cash');
+      showToast(`Bounty fulfilled! Earned +$${req.reward} & +15 Rep!`, '🏆');
+      renderRequests();
+      renderRack();
+      renderFloor();
+      updateTopBar();
+    }
+
+    function refreshRequests() {
+      playSound('tap');
+      const allGenes = Object.keys(GENE_DEFS);
+      gameState.activeRequests = [
+        {
+          id: 'req_' + Date.now() + '_1',
+          client: 'Specialty Breeder Co.',
+          targetGene: allGenes[Math.floor(Math.random() * allGenes.length)],
+          minWeight: Math.round(300 + Math.random() * 400),
+          reward: Math.round(800 + Math.random() * 1400)
+        },
+        {
+          id: 'req_' + Date.now() + '_2',
+          client: 'Viper & Python Studio',
+          targetGene: allGenes[Math.floor(Math.random() * allGenes.length)],
+          minWeight: Math.round(200 + Math.random() * 500),
+          reward: Math.round(1100 + Math.random() * 1600)
+        }
+      ];
+      showToast('New client requests received!', '📋');
+      renderRequests();
+    }
+
+    function renderClassifieds() {
+      const list = document.getElementById('classifieds-list');
+      list.innerHTML = '';
+
+      if (!gameState.classifieds || gameState.classifieds.length === 0) {
+        generateClassifieds();
+      }
+
+      gameState.classifieds.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'p-3 bg-neutral-950/80 rounded-2xl border border-neutral-800 flex justify-between items-center text-xs';
+        item.innerHTML = `
+          <div>
+            <div class="font-bold text-white">${c.name}</div>
+            <div class="text-[10px] text-neutral-400">
+              <span class="${c.gender === 'male' ? 'text-blue-400' : 'text-rose-400'} font-bold">${c.gender === 'male' ? '♂ Male' : '♀ Female'}</span> • ${c.weight}g • ${c.genes.join(', ') || 'Normal'}
+            </div>
+            <div class="text-xs text-emerald-400 font-bold mt-0.5">$${c.cost}</div>
+          </div>
+          <button onclick="buyClassifiedSnake('${c.id}')" class="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-xs font-bold active:scale-95 transition">
+            Buy Stock
+          </button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function generateClassifieds() {
+      const allGenes = Object.keys(GENE_DEFS);
+      gameState.classifieds = [
+        {
+          id: 'shop_1',
+          name: 'Piebald Breeder Male',
+          genes: ['Piebald'],
+          hets: [],
+          gender: 'male',
+          weight: 750,
+          age: 'Adult',
+          cost: 380
+        },
+        {
+          id: 'shop_2',
+          name: 'Blue Insularis Neonate',
+          genes: ['Blue Insularis'],
+          hets: [],
+          gender: 'female',
+          weight: 120,
+          age: 'Juvenile',
+          cost: 950
+        },
+        {
+          id: 'shop_3',
+          name: 'Gaboon Geometry Female',
+          genes: ['Gaboon Viper'],
+          hets: [],
+          gender: 'female',
+          weight: 1300,
+          age: 'Adult',
+          cost: 1400
+        },
+        {
+          id: 'shop_4',
+          name: 'Candy Pastel Male',
+          genes: ['Candy', 'Pastel'],
+          hets: [],
+          gender: 'male',
+          weight: 650,
+          age: 'Adult',
+          cost: 820
+        }
+      ];
+    }
+
+    function refreshClassifieds() {
+      playSound('tap');
+      generateClassifieds();
+      showToast('Expo vendor listings refreshed!', '🏷️');
+      renderClassifieds();
+    }
+
+    function buyClassifiedSnake(shopId) {
+      const idx = gameState.classifieds.findIndex(c => c.id === shopId);
+      if (idx === -1) return;
+      const s = gameState.classifieds[idx];
+
+      if (gameState.cash < s.cost) {
+        showToast('Not enough cash to buy this snake!', '💸');
+        return;
+      }
+
+      gameState.cash -= s.cost;
+      const bought = {
+        id: 'snake_' + Date.now(),
+        name: s.name,
+        genes: [...s.genes],
+        hets: [...s.hets],
+        gender: s.gender,
+        weight: s.weight,
+        age: s.age,
+        value: s.cost,
+        pose: 'center'
+      };
+      gameState.snakes.push(bought);
+      gameState.classifieds.splice(idx, 1);
+
+      playSound('cash');
+      showToast(`Purchased ${bought.name}!`, '🐍');
+      renderClassifieds();
+      renderRack();
+      updateTopBar();
+    }
+
+    // MANUAL & PUNNETT CALCULATOR
+    function renderManualTab() {
+      const enc = document.getElementById('morph-encyclopedia');
+      enc.innerHTML = '';
+
+      Object.entries(GENE_DEFS).forEach(([name, data]) => {
+        const card = document.createElement('div');
+        card.className = 'p-2.5 bg-neutral-950 rounded-2xl border border-neutral-800 space-y-1';
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-white text-xs">${name}</span>
+            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-neutral-900 border border-neutral-700 ${data.type === 'recessive' ? 'text-purple-400' : data.type === 'codom' ? 'text-amber-400' : 'text-emerald-400'}">
+              ${data.type}
+            </span>
+          </div>
+          <p class="text-[11px] text-neutral-400">${data.desc}</p>
+        `;
+        enc.appendChild(card);
+      });
+    }
+
+    function calculatePunnettOdds() {
+      playSound('tap');
+      const sireGene = document.getElementById('calc-sire-gene').value;
+      const damGene = document.getElementById('calc-dam-gene').value;
+      const res = document.getElementById('punnett-result');
+
+      let text = '';
+      if (sireGene === damGene) {
+        text = `<strong>100% Visual ${sireGene}</strong> neonates produced in this pairing.`;
+      } else if (damGene === 'Normal') {
+        text = `Produces <strong>50% Visual / 100% Het ${sireGene}</strong> carriers depending on recessive or dominant inheritance.`;
+      } else {
+        text = `High odds of double-gene combinations! Estimated <strong>25% Visual Combos</strong>, <strong>50% Single Gene</strong>, and <strong>25% Normal</strong>.`;
+      }
+
+      res.innerHTML = text;
+    }
+
+    // GOD MODE CHEATS
+    function cheatAddCash(amount) {
+      gameState.cash += amount;
+      playSound('cash');
+      showToast(`+$${amount.toLocaleString()} Added!`, '⚡');
+      updateTopBar();
+    }
+
+    function cheatHatchClutches() {
+      if (gameState.clutches.length === 0) {
+        showToast('No active clutches to hatch!', '⚠️');
+        return;
+      }
+      gameState.clutches.forEach(c => {
+        c.progress = c.maxProgress;
+      });
+      playSound('egg');
+      showToast('All incubator clutches ready to hatch!', '⚡');
+      renderClutches();
+    }
+
+    function cheatSummonVIP() {
+      gameState.cash += 5000;
+      gameState.rep += 50;
+      playSound('cash');
+      showToast('VIP Whale investor arrived! +$5,000 & +50 Rep', '👑');
+      updateTopBar();
+    }
+
+    function synthesizeCustomSnake() {
+      const genes = [];
+      if (document.getElementById('gene-piebald')?.checked) genes.push('Piebald');
+      if (document.getElementById('gene-spider')?.checked) genes.push('Spider');
+      if (document.getElementById('gene-pinstripe')?.checked) genes.push('Pinstripe');
+      if (document.getElementById('gene-champagne')?.checked) genes.push('Champagne');
+      if (document.getElementById('gene-banana')?.checked) genes.push('Banana');
+      if (document.getElementById('gene-pastel')?.checked) genes.push('Pastel');
+      if (document.getElementById('gene-clown')?.checked) genes.push('Clown');
+      if (document.getElementById('gene-albino')?.checked) genes.push('Albino');
+      if (document.getElementById('gene-blueinsularis')?.checked) genes.push('Blue Insularis');
+      if (document.getElementById('gene-gaboon')?.checked) genes.push('Gaboon Viper');
+      if (document.getElementById('gene-bel')?.checked) genes.push('Blue-Eyed Leucistic');
+      if (document.getElementById('gene-sunset')?.checked) genes.push('Sunset');
+      if (document.getElementById('gene-pandapied')?.checked) genes.push('Panda Pied');
+      if (document.getElementById('gene-lavender')?.checked) genes.push('Lavender Albino');
+      if (document.getElementById('gene-axanthic')?.checked) genes.push('Axanthic');
+      if (document.getElementById('gene-candy')?.checked) genes.push('Candy');
+      if (document.getElementById('gene-highway')?.checked) genes.push('Highway');
+      if (document.getElementById('gene-ghost')?.checked) genes.push('Ghost');
+      if (document.getElementById('gene-enchi')?.checked) genes.push('Enchi');
+      if (document.getElementById('gene-leopard')?.checked) genes.push('Leopard');
+
+      // 10 New Ultra Genes
+      if (document.getElementById('gene-dragonscale')?.checked) genes.push('Dragon Scale');
+      if (document.getElementById('gene-nebula')?.checked) genes.push('Galactic Nebula');
+      if (document.getElementById('gene-magma')?.checked) genes.push('Magma Molten');
+      if (document.getElementById('gene-toxicacid')?.checked) genes.push('Toxic Acid');
+      if (document.getElementById('gene-obsidian')?.checked) genes.push('Obsidian');
+      if (document.getElementById('gene-rainbowboelen')?.checked) genes.push('Rainbow Boelen');
+      if (document.getElementById('gene-cherryblossom')?.checked) genes.push('Cherry Blossom');
+      if (document.getElementById('gene-goldenchild')?.checked) genes.push('Golden Child');
+      if (document.getElementById('gene-coralglow')?.checked) genes.push('Coral Glow');
+      if (document.getElementById('gene-cybermatrix')?.checked) genes.push('Cyber Matrix');
+
+      const sexEl = document.querySelector('input[name="synth-sex"]:checked');
+      const sex = sexEl ? sexEl.value : 'male';
+
+      let val = 200;
+      genes.forEach(g => {
+        if (GENE_DEFS[g]) val = Math.round(val * GENE_DEFS[g].multiplier);
+      });
+
+      const synthSnake = {
+        id: 'synth_' + Date.now(),
+        name: genes.length ? genes.join(' ') : 'Synthesized Normal',
+        genes: genes,
+        hets: [],
+        gender: sex,
+        weight: sex === 'male' ? 800 : 1400,
+        age: 'Adult',
+        value: val,
+        pose: 'center'
+      };
+
+      gameState.snakes.push(synthSnake);
+      playSound('cash');
+      showToast(`Synthesized ${synthSnake.name} to Rack!`, '⚡');
+      renderRack();
+      updateTopBar();
+    }
+
+    function resetGameSave() {
+      localStorage.removeItem('bp_tycoon_save');
+      location.reload();
+    }
+
+    // GAME LOOP: Incubator Tick & Time
+    let cycleCounter = 0;
+    setInterval(() => {
+      cycleCounter++;
+
+      // Advance clutches
+      let changed = false;
+      gameState.clutches.forEach(c => {
+        if (c.progress < c.maxProgress) {
+          c.progress += 1;
+          changed = true;
+        }
+      });
+      if (changed) renderClutches();
+
+      // Auto Breeder check every 5 seconds
+      if (cycleCounter % 5 === 0) {
+        runAutoBreederCycle();
+      }
+
+      // Auto Liquidator check every 15 seconds
+      if (cycleCounter % 15 === 0) {
+        runAutoSellCycle();
+      }
+
+      // Update iOS status clock
+      const now = new Date();
+      const hrs = now.getHours();
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('ios-time').textContent = `${hrs}:${mins}`;
+    }, 1000);
+
+    // BOOTSTRAP
+    window.onload = function() {
+      loadSavedState();
+      // Sync automation switch states
+      const abToggle = document.getElementById('toggle-auto-breed');
+      if (abToggle) abToggle.checked = !!gameState.autoBreedEnabled;
+      const asToggle = document.getElementById('toggle-auto-sell');
+      if (asToggle) asToggle.checked = !!gameState.autoSellEnabled;
+
+      renderRack();
+      updateTopBar();
+    };
+  </script>
+</body>
+</html>
