@@ -230,15 +230,23 @@
                 <span>🎪</span> Booth Display Tables
               </h3>
             </div>
-            <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold">
-              <span id="floor-count">0</span>/4 On Display
-            </span>
+            <div class="flex items-center gap-2">
+              <button onclick="quickFillFloorCheapest()" class="text-[10px] px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl font-bold active:scale-95 transition flex items-center gap-1">
+                <span>⚡</span> Quick Fill Cheapest
+              </button>
+              <button onclick="upgradeFloorCapacity()" id="floor-upgrade-btn" class="text-[10px] px-2 py-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 rounded-xl font-bold transition">
+                + Expand Floor ($500)
+              </button>
+              <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold">
+                <span id="floor-count">0</span>/<span id="floor-max">8</span> On Display
+              </span>
+            </div>
           </div>
           <p class="text-[11px] text-neutral-400">
-            Choose up to 4 snakes from your rack to put on the showroom floor. Walk-in buyers pay higher markups for displayed snakes!
+            Showcase snakes on display tables to sell them quickly at higher markups to walk-in attendees!
           </p>
 
-          <div id="floor-grid" class="grid grid-cols-2 gap-3 pt-1">
+          <div id="floor-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
             <!-- Populated by JS -->
           </div>
         </div>
@@ -393,6 +401,22 @@
         <div class="bg-neutral-900 border border-neutral-800 p-4 rounded-3xl space-y-3">
           <h4 class="text-xs font-bold text-white uppercase tracking-wider">🧬 Morph Library & Rarity</h4>
           <div class="space-y-2 text-xs" id="morph-encyclopedia">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Secret Combo Recipes Guide -->
+        <div class="bg-gradient-to-br from-neutral-900 to-indigo-950/40 border border-indigo-900/40 p-4 rounded-3xl space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <span>🔮</span> Rare Morph Combo Recipes
+            </h4>
+            <span class="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-2 py-0.5 rounded-full font-semibold">Breedable</span>
+          </div>
+          <p class="text-[11px] text-neutral-300">
+            You don't need God Mode to discover exotic morphs! Pair standard snakes containing these genetic ingredients to unlock them naturally in clutches:
+          </p>
+          <div class="space-y-1.5 text-[11px]" id="recipes-guide-list">
             <!-- Rendered by JS -->
           </div>
         </div>
@@ -575,30 +599,51 @@
     </main>
 
     <!-- iOS Frosted Bottom Tab Navigation -->
-    <nav class="safe-bottom absolute bottom-0 left-0 right-0 bg-neutral-950/85 backdrop-blur-xl border-t border-neutral-800/80 px-4 py-2 z-40">
+    <nav class="safe-bottom absolute bottom-0 left-0 right-0 bg-neutral-950/90 backdrop-blur-xl border-t border-neutral-800/80 px-2 py-2 z-40">
       <div class="flex justify-around items-center h-12">
-        <button onclick="switchTab('rack')" id="tab-btn-rack" class="flex flex-col items-center gap-1 text-emerald-400 active:scale-90 transition">
-          <span class="text-lg">🐍</span>
+        <button onclick="switchTab('rack')" id="tab-btn-rack" class="flex flex-col items-center gap-0.5 text-emerald-400 active:scale-90 transition px-2 py-1">
+          <span class="text-base">🐍</span>
           <span class="text-[10px] font-bold">Rack</span>
         </button>
-        <button onclick="switchTab('breeding')" id="tab-btn-breeding" class="flex flex-col items-center gap-1 text-neutral-400 active:scale-90 transition">
-          <span class="text-lg">🧬</span>
+        <button onclick="switchTab('breeding')" id="tab-btn-breeding" class="flex flex-col items-center gap-0.5 text-neutral-400 active:scale-90 transition px-2 py-1">
+          <span class="text-base">🥚</span>
           <span class="text-[10px] font-bold">Breed</span>
         </button>
-        <button onclick="switchTab('market')" id="tab-btn-market" class="flex flex-col items-center gap-1 text-neutral-400 active:scale-90 transition">
-          <span class="text-lg">🎪</span>
-          <span class="text-[10px] font-bold">Expo</span>
+        <button onclick="switchTab('market')" id="tab-btn-market" class="flex flex-col items-center gap-0.5 text-neutral-400 active:scale-90 transition px-2 py-1">
+          <span class="text-base">🎪</span>
+          <span class="text-[10px] font-bold">Market</span>
         </button>
-        <button onclick="switchTab('manual')" id="tab-btn-manual" class="flex flex-col items-center gap-1 text-neutral-400 active:scale-90 transition">
-          <span class="text-lg">📖</span>
+        <button onclick="switchTab('manual')" id="tab-btn-manual" class="flex flex-col items-center gap-0.5 text-neutral-400 active:scale-90 transition px-2 py-1">
+          <span class="text-base">📖</span>
           <span class="text-[10px] font-bold">Manual</span>
         </button>
-        <button onclick="switchTab('god')" id="tab-btn-god" class="flex flex-col items-center gap-1 text-purple-400 active:scale-90 transition">
-          <span class="text-lg">⚡</span>
+        <button onclick="switchTab('god')" id="tab-btn-god" class="flex flex-col items-center gap-0.5 text-neutral-400 active:scale-90 transition px-2 py-1">
+          <span class="text-base">⚡</span>
           <span class="text-[10px] font-bold">God Mode</span>
         </button>
       </div>
     </nav>
+
+    <!-- MODAL: CONTRACT FULFILLMENT SELECTOR -->
+    <div id="contract-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-neutral-900 border border-neutral-800 rounded-3xl w-full max-w-sm p-4 space-y-3 shadow-2xl relative flex flex-col max-h-[85vh]">
+        <div class="flex justify-between items-start">
+          <div>
+            <h3 class="text-sm font-extrabold text-white" id="contract-modal-title">Select Snake for Contract</h3>
+            <p class="text-[11px] text-neutral-400" id="contract-modal-req">Requirement: Piebald (400g+)</p>
+          </div>
+          <button onclick="closeContractModal()" class="w-7 h-7 rounded-full bg-neutral-800 text-neutral-400 hover:text-white flex items-center justify-center text-xs">
+            ✕
+          </button>
+        </div>
+        <p class="text-[11px] text-neutral-400">
+          Pick which snake from your rack you wish to trade. Holdbacks in your Private Vault (👑) are safely hidden from this list.
+        </p>
+        <div id="contract-candidates-list" class="space-y-2 overflow-y-auto flex-1 pr-1 hide-scrollbar">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
 
     <!-- MODAL: SNAKE INSPECTOR -->
     <div id="inspect-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
@@ -738,6 +783,7 @@
     let gameState = {
       cash: 1500,
       rep: 100,
+      floorCapacity: 8,
       snakes: [],
       clutches: [],
       floorSnakeIds: [],
@@ -746,10 +792,32 @@
       autoSellEnabled: false,
       currentRackFilter: 'all',
       activeInspectId: null,
+      activeContractReq: null,
       activeCustomer: null,
       activeRequests: [],
       classifieds: []
     };
+
+    // SECRET COMBO RECIPES (Breedable from standard genes)
+    const SECRET_RECIPES = [
+      { morph: 'Blue Insularis', ingredients: ['Banana', 'Pastel', 'Enchi'], chance: 0.28, hint: 'Banana + Pastel + Enchi' },
+      { morph: 'Gaboon Viper', ingredients: ['Leopard', 'Pinstripe', 'Spider'], chance: 0.25, hint: 'Leopard + Pinstripe + Spider' },
+      { morph: 'Blue-Eyed Leucistic', ingredients: ['Pastel', 'Spider', 'Champagne'], chance: 0.30, hint: 'Pastel + Spider + Champagne' },
+      { morph: 'Sunset', ingredients: ['Enchi', 'Candy'], chance: 0.25, hint: 'Enchi + Candy' },
+      { morph: 'Panda Pied', ingredients: ['Piebald', 'Axanthic'], chance: 0.25, hint: 'Piebald + Axanthic' },
+      { morph: 'Lavender Albino', ingredients: ['Albino', 'Candy'], chance: 0.30, hint: 'Albino + Candy' },
+      { morph: 'Highway', ingredients: ['Pastel', 'Pinstripe'], chance: 0.30, hint: 'Pastel + Pinstripe' },
+      { morph: 'Dragon Scale', ingredients: ['Enchi', 'Pastel', 'Leopard'], chance: 0.22, hint: 'Enchi + Pastel + Leopard' },
+      { morph: 'Galactic Nebula', ingredients: ['Banana', 'Axanthic', 'Ghost'], chance: 0.22, hint: 'Banana + Axanthic + Ghost' },
+      { morph: 'Magma Molten', ingredients: ['Sunset', 'Leopard'], chance: 0.26, hint: 'Sunset (or Enchi+Candy) + Leopard' },
+      { morph: 'Toxic Acid', ingredients: ['Pastel', 'Spider', 'Enchi'], chance: 0.28, hint: 'Pastel + Spider + Enchi' },
+      { morph: 'Obsidian', ingredients: ['Axanthic', 'Pinstripe'], chance: 0.32, hint: 'Axanthic + Pinstripe' },
+      { morph: 'Rainbow Boelen', ingredients: ['Blue Insularis', 'Obsidian'], chance: 0.20, hint: 'Blue Insularis + Obsidian' },
+      { morph: 'Cherry Blossom', ingredients: ['Albino', 'Pastel', 'Candy'], chance: 0.24, hint: 'Albino + Pastel + Candy' },
+      { morph: 'Golden Child', ingredients: ['Champagne', 'Enchi'], chance: 0.30, hint: 'Champagne + Enchi' },
+      { morph: 'Coral Glow', ingredients: ['Banana', 'Pastel'], chance: 0.35, hint: 'Banana + Pastel' },
+      { morph: 'Cyber Matrix', ingredients: ['Pinstripe', 'Spider', 'Ghost'], chance: 0.22, hint: 'Pinstripe + Spider + Ghost' }
+    ];
 
     const GENE_DEFS = {
       'Piebald': { type: 'recessive', multiplier: 2.2, desc: 'Pure porcelain white calico belly with jagged pattern patches.' },
@@ -865,9 +933,15 @@
       let colEyeGlint = '#ffffff';
       let colTongue = '#e11d48';
 
+      // Apply Individual Phenotypic Variation from Snake's unique seed
+      const patternDensityShift = (rnd() - 0.5) * 0.12;
+      const freckleRndThreshold = 0.90 + (rnd() * 0.08); // Unique freckle density
+      const piedNoiseThreshold = 0.40 + (rnd() * 0.12); // Unique patch size
+      const isAltHue = rnd() > 0.6; // Subtle individual scale tone variation
+
       if (isDragon) {
         colOutline = '#022c22';
-        colBase = '#065f46';
+        colBase = isAltHue ? '#044e3a' : '#065f46';
         colBaseLight = '#047857';
         colPattern = '#f59e0b';
         colPatternLight = '#fbbf24';
@@ -878,7 +952,7 @@
         colTongue = '#f97316';
       } else if (isNebula) {
         colOutline = '#1e1b4b';
-        colBase = '#312e81';
+        colBase = isAltHue ? '#2e1065' : '#312e81';
         colBaseLight = '#4338ca';
         colPattern = '#c084fc';
         colPatternLight = '#e879f9';
@@ -890,7 +964,7 @@
         colOutline = '#18181b';
         colBase = '#27272a';
         colBaseLight = '#3f3f46';
-        colPattern = '#dc2626';
+        colPattern = isAltHue ? '#ef4444' : '#dc2626';
         colPatternLight = '#f97316';
         colBelly = '#ea580c';
         colBellyShadow = '#c2410c';
@@ -899,7 +973,7 @@
         colTongue = '#ef4444';
       } else if (isToxic) {
         colOutline = '#14532d';
-        colBase = '#4d7c0f';
+        colBase = isAltHue ? '#3f6212' : '#4d7c0f';
         colBaseLight = '#65a30d';
         colPattern = '#a3e635';
         colPatternLight = '#bef264';
@@ -910,7 +984,7 @@
       } else if (isObsidian) {
         colOutline = '#000000';
         colBase = '#09090b';
-        colBaseLight = '#18181b';
+        colBaseLight = isAltHue ? '#141417' : '#18181b';
         colPattern = '#1c1917';
         colPatternLight = '#292524';
         colBelly = '#27272a';
@@ -921,7 +995,7 @@
         colOutline = '#020617';
         colBase = '#0f172a';
         colBaseLight = '#1e293b';
-        colPattern = '#06b6d4';
+        colPattern = isAltHue ? '#3b82f6' : '#06b6d4';
         colPatternLight = '#d946ef';
         colBelly = '#38bdf8';
         colBellyShadow = '#0284c7';
@@ -930,7 +1004,7 @@
       } else if (isCherry) {
         colOutline = '#831843';
         colBase = '#fbcfe8';
-        colBaseLight = '#fdf2f8';
+        colBaseLight = isAltHue ? '#fff1f2' : '#fdf2f8';
         colPattern = '#f472b6';
         colPatternLight = '#ec4899';
         colBelly = '#ffffff';
@@ -940,7 +1014,7 @@
       } else if (isGoldenChild) {
         colOutline = '#451a03';
         colBase = '#78350f';
-        colBaseLight = '#92400e';
+        colBaseLight = isAltHue ? '#a16207' : '#92400e';
         colPattern = '#facc15';
         colPatternLight = '#fde047';
         colBelly = '#fef08a';
@@ -951,7 +1025,7 @@
         colOutline = '#431407';
         colBase = '#ea580c';
         colBaseLight = '#fb923c';
-        colPattern = '#c084fc';
+        colPattern = isAltHue ? '#a855f7' : '#c084fc';
         colPatternLight = '#e879f9';
         colBelly = '#ffedd5';
         colBellyShadow = '#fed7aa';
@@ -962,7 +1036,7 @@
         colBase = '#0f172a';
         colBaseLight = '#1e293b';
         colPattern = '#14b8a6';
-        colPatternLight = '#2dd4bf';
+        colPatternLight = isAltHue ? '#5eead4' : '#2dd4bf';
         colBelly = '#99f6e4';
         colBellyShadow = '#5eead4';
         colEye = '#06b6d4';
@@ -991,7 +1065,7 @@
         colEyeGlint = '#fce7f3';
       } else if (isAxanthic) {
         colOutline = '#09090b';
-        colBase = '#27272a';
+        colBase = isAltHue ? '#18181b' : '#27272a';
         colBaseLight = '#3f3f46';
         colPattern = '#a1a1aa';
         colPatternLight = '#d4d4d8';
@@ -1017,7 +1091,7 @@
         colEye = '#475569';
       } else if (isSunset) {
         colOutline = '#330f0a';
-        colBase = '#9a3412';
+        colBase = isAltHue ? '#7c2d12' : '#9a3412';
         colBaseLight = '#c2410c';
         colPattern = '#ea580c';
         colPatternLight = '#fb923c';
@@ -1046,7 +1120,7 @@
         colEyeGlint = '#fce7f3';
       } else if (isBlueInsularis) {
         colOutline = '#042f2e';
-        colBase = '#0891b2';
+        colBase = isAltHue ? '#0e7490' : '#0891b2';
         colBaseLight = '#06b6d4';
         colPattern = '#22d3ee';
         colPatternLight = '#a5f3fc';
@@ -1059,7 +1133,7 @@
         colOutline = '#1c140e';
         colBase = '#5c4436';
         colBaseLight = '#785b48';
-        colPattern = '#d7b38c';
+        colPattern = isAltHue ? '#cbb092' : '#d7b38c';
         colPatternLight = '#ecd9c6';
         colBelly = '#f5ede4';
         colBellyShadow = '#dfccba';
@@ -1104,9 +1178,6 @@
       }
 
       // 1. Draw Authentic Snug Tiered Ball Python Coils (Basket / Donut Stack)
-      // Tier 1: Outer base coil ring resting on the substrate (widest foundation)
-      // Tier 2: Mid-tier overlapping wrap
-      // Tier 3: Inner body wrap forming the snug nestled center
       for (let y = 30; y <= 59; y++) {
         for (let x = 8; x <= 56; x++) {
           const cx = 32;
@@ -1117,35 +1188,27 @@
           const dy = (y - cy) / 12.5;
           const rSq = dx * dx + dy * dy;
 
-          // Layer 1: Outer massive base coil (rSq between 0.38 and 1.05)
           const inOuterCoil = (rSq <= 1.05 && rSq >= 0.40 && y >= 34);
 
-          // Layer 2: Mid-tier anterior overlapping coil
           const dxMid = (x - 32) / 16.5;
           const dyMid = (y - 44) / 8.5;
           const rMidSq = dxMid * dxMid + dyMid * dyMid;
           const inMidCoil = (rMidSq <= 1.0 && rMidSq >= 0.22 && y >= 32);
 
-          // Layer 3: Inner wrap embracing the emerging neck
           const dxIn = (x - 32) / 10.5;
           const dyIn = (y - 42) / 5.5;
           const rInSq = dxIn * dxIn + dyIn * dyIn;
           const inInnerCoil = (rInSq <= 1.0 && rInSq >= 0.12 && y >= 35);
 
           if (inOuterCoil || inMidCoil || inInnerCoil) {
-            // Outline boundary tests
             const isBaseOuterEdge = (rSq > 0.94 && y >= 35) || (y === 59 && rSq <= 1.0);
             const isMidOuterEdge = (rMidSq > 0.91 && y >= 33 && y <= 48);
             const isInnerEdge = (rInSq < 0.18 && y >= 40);
-
-            // Crease shadow between outer ring and mid ring for coiled depth
             const isCrease = (Math.abs(rMidSq - 0.95) < 0.08 && y >= 39 && y <= 52);
 
             let isEdge = isBaseOuterEdge || (inMidCoil && !inOuterCoil && isMidOuterEdge) || isInnerEdge;
-
             let col = isEdge ? colOutline : colBase;
 
-            // Shading: upper coil highlights and lower coil shading
             if (!isEdge) {
               if (y < 42 && rSq > 0.45) {
                 col = colBaseLight;
@@ -1154,13 +1217,12 @@
               }
             }
 
-            // Morph Pattern blotches across the rounded coils
+            // Morph Pattern blotches across the rounded coils with individual density
             const pVal = Math.sin(x * 0.44 + y * 0.12) * Math.cos(y * 0.48 - x * 0.1);
-            if (!isEdge && pVal > 0.16 && !isChampagne) {
+            if (!isEdge && pVal > (0.16 + patternDensityShift) && !isChampagne) {
               col = (pVal > 0.45) ? colPatternLight : colPattern;
             }
 
-            // Ventral belly scutes (visible on bottom-front underbelly and internal curve)
             if (!isEdge) {
               const inFrontBelly = (y >= 51 && x >= 20 && x <= 44);
               const inLowerCrease = isCrease && (x >= 22 && x <= 42);
@@ -1183,7 +1245,7 @@
         for (let py = 35; py <= 54; py += 3) {
           for (let px = 10; px <= 54; px += 4) {
             if (grid[py] && grid[py][px] && grid[py][px] !== '#111114' && grid[py][px] !== '#0b0b0e') {
-              setPix(px, py, '#2dd4bf');
+              setPix(px, py, colPatternLight);
               if (grid[py + 1] && px % 8 === 0) setPix(px, py + 1, '#14b8a6');
             }
           }
@@ -1194,8 +1256,8 @@
         for (let py = 35; py <= 56; py += 2) {
           for (let px = 10; px <= 54; px += 3) {
             if (grid[py] && grid[py][px] && grid[py][px] !== '#111114' && grid[py][px] !== '#0b0b0e' && rnd() > 0.65) {
-              setPix(px, py, '#f97316');
-              setPix(px + 1, py, '#dc2626');
+              setPix(px, py, colPatternLight);
+              setPix(px + 1, py, colPattern);
             }
           }
         }
@@ -1204,7 +1266,7 @@
       if (isNebula) {
         for (let py = 34; py <= 56; py++) {
           for (let px = 10; px <= 54; px++) {
-            if (grid[py] && grid[py][px] && grid[py][px] !== '#111114' && grid[py][px] !== '#0b0b0e' && rnd() > 0.96) {
+            if (grid[py] && grid[py][px] && grid[py][px] !== '#111114' && grid[py][px] !== '#0b0b0e' && rnd() > 0.95) {
               setPix(px, py, '#ffffff');
             }
           }
@@ -1243,7 +1305,7 @@
       if (isBanana) {
         for (let py = 33; py < 56; py++) {
           for (let px = 10; px < 54; px++) {
-            if ((grid[py][px] === colPattern || grid[py][px] === colBase) && rnd() > 0.94) {
+            if ((grid[py][px] === colPattern || grid[py][px] === colBase) && rnd() > freckleRndThreshold) {
               grid[py][px] = '#1a1020';
             }
           }
@@ -1262,19 +1324,15 @@
       }
 
       const neckBaseX = 32;
-      // Neck rises seamlessly from inside the coil core (y=44) straight up to under the jaw (y=16)
       for (let ny = 16; ny <= 44; ny++) {
         const t = (44 - ny) / 28;
-        // Natural gentle S-curve easing towards the active head angle
         const curveOffset = Math.sin(t * Math.PI) * (pose === 'left' ? -2.5 : pose === 'right' ? 2.5 : 0);
         const cx = Math.round(neckBaseX + (headCenterX - neckBaseX) * t + curveOffset);
-        // Muscular tapering from base into throat
         const w = (ny > 36) ? 4 : (ny > 26) ? 3 : (ny > 20) ? 3 : 2;
 
         for (let nx = cx - w - 1; nx <= cx + w + 1; nx++) {
           const isEdge = (nx === cx - w - 1 || nx === cx + w + 1);
           let col = isEdge ? colOutline : colBase;
-          // Belly throat scale line
           if (!isEdge && Math.abs(nx - cx) <= 1) {
             col = (ny % 2 === 0) ? colBelly : colBellyShadow;
           }
@@ -1282,7 +1340,7 @@
         }
       }
 
-      // 3. Rounded Spade Head & Snout (seamlessly locking directly onto the throat at y=16)
+      // 3. Rounded Spade Head & Snout
       let hx = headCenterX;
       let hy = headCenterY;
       const headWidth = 7;
@@ -1305,7 +1363,7 @@
         }
       }
 
-      // Throat & Chin Seal: solid connection with zero gaps
+      // Throat & Chin Seal
       setPix(hx - 2, hy + 2, colOutline);
       setPix(hx + 2, hy + 2, colOutline);
       setPix(hx - 1, hy + 2, colBelly);
@@ -1347,15 +1405,15 @@
         setPix(hx + 2, hy - 6, '#785b48');
       }
 
-      // Piebald / Panda Pied Calico Overlay
+      // Piebald / Panda Pied Calico Overlay (with individual patch variation)
       if (isPiebald || isPandaPied) {
         for (let y = 30; y < GH; y++) {
           for (let x = 0; x < GW; x++) {
             if (grid[y][x] && grid[y][x] !== '#111114' && grid[y][x] !== '#0b0b0e') {
               const piedNoise = Math.sin(x * 0.18 + seed * 0.05) + Math.cos(y * 0.22);
-              if (piedNoise > 0.45) {
+              if (piedNoise > piedNoiseThreshold) {
                 grid[y][x] = '#ffffff';
-                if (piedNoise < 0.55 && isPiebald) {
+                if (piedNoise < (piedNoiseThreshold + 0.10) && isPiebald) {
                   grid[y][x] = '#d97706';
                 }
               }
@@ -1449,6 +1507,8 @@
       document.getElementById('rack-count').textContent = `(${gameState.snakes.length})`;
       const floorCountEl = document.getElementById('floor-count');
       if (floorCountEl) floorCountEl.textContent = (gameState.floorSnakeIds || []).length;
+      const floorMaxEl = document.getElementById('floor-max');
+      if (floorMaxEl) floorMaxEl.textContent = gameState.floorCapacity || 8;
       const vaultCountEl = document.getElementById('vault-count');
       if (vaultCountEl) vaultCountEl.textContent = (gameState.vaultSnakeIds || []).length;
       saveState();
@@ -1662,6 +1722,7 @@
     function toggleActiveSnakeFloor() {
       if (!gameState.activeInspectId) return;
       if (!gameState.floorSnakeIds) gameState.floorSnakeIds = [];
+      const maxSlots = gameState.floorCapacity || 8;
       playSound('tap');
 
       const idx = gameState.floorSnakeIds.indexOf(gameState.activeInspectId);
@@ -1669,8 +1730,8 @@
         gameState.floorSnakeIds.splice(idx, 1);
         showToast('Removed from Showroom Floor', '🎪');
       } else {
-        if (gameState.floorSnakeIds.length >= 4) {
-          showToast('Floor display is full! Max 4 tables.', '⚠️');
+        if (gameState.floorSnakeIds.length >= maxSlots) {
+          showToast(`Floor display full! Limit is ${maxSlots} tables.`, '⚠️');
           return;
         }
         gameState.floorSnakeIds.push(gameState.activeInspectId);
@@ -2037,6 +2098,17 @@
           }
         });
 
+        // Check for Natural Secret Combo Recipe Discovery
+        const combinedPool = [...new Set([...c.sireGenes, ...c.damGenes, ...c.sireHets, ...c.damHets])];
+        SECRET_RECIPES.forEach(recipe => {
+          if (!genes.includes(recipe.morph)) {
+            const hasAllIngredients = recipe.ingredients.every(ing => combinedPool.includes(ing));
+            if (hasAllIngredients && Math.random() < recipe.chance) {
+              genes.push(recipe.morph);
+            }
+          }
+        });
+
         // Determine value
         let val = 120;
         genes.forEach(g => {
@@ -2044,7 +2116,7 @@
         });
 
         const neonate = {
-          id: 'snake_' + Date.now() + '_' + i,
+          id: 'snake_' + Date.now() + '_' + i + '_' + Math.floor(Math.random() * 1000),
           name: `${genes[0] || 'Normal'} Hatchling #${i + 1}`,
           genes: genes,
           hets: hets,
@@ -2073,42 +2145,69 @@
       if (!gameState.activeCustomer) summonNewCustomer();
     }
 
+    function upgradeFloorCapacity() {
+      const curCap = gameState.floorCapacity || 8;
+      if (curCap >= 12) {
+        showToast('Showroom is already fully expanded (12 tables)!', '🎪');
+        return;
+      }
+      const cost = 500;
+      if (gameState.cash < cost) {
+        showToast(`Need $${cost} to expand floor!`, '💸');
+        return;
+      }
+
+      gameState.cash -= cost;
+      gameState.floorCapacity = curCap + 2;
+      playSound('cash');
+      showToast(`Showroom expanded to ${gameState.floorCapacity} display tables!`, '🎪');
+
+      const btn = document.getElementById('floor-upgrade-btn');
+      if (btn) {
+        btn.textContent = gameState.floorCapacity >= 12 ? 'Max Floor (12)' : `+ Expand Floor ($${cost + 250})`;
+      }
+      renderFloor();
+      updateTopBar();
+    }
+
     function renderFloor() {
       const grid = document.getElementById('floor-grid');
       grid.innerHTML = '';
       if (!gameState.floorSnakeIds) gameState.floorSnakeIds = [];
 
+      const maxSlots = gameState.floorCapacity || 8;
       document.getElementById('floor-count').textContent = gameState.floorSnakeIds.length;
+      document.getElementById('floor-max').textContent = maxSlots;
 
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < maxSlots; i++) {
         const snakeId = gameState.floorSnakeIds[i];
         const snake = snakeId ? gameState.snakes.find(s => s.id === snakeId) : null;
 
         const table = document.createElement('div');
-        table.className = 'p-3 bg-neutral-950/70 border border-neutral-800 rounded-2xl flex flex-col items-center justify-center relative min-h-[140px]';
+        table.className = 'p-2.5 bg-neutral-950/70 border border-neutral-800 rounded-2xl flex flex-col items-center justify-center relative min-h-[130px]';
 
         if (snake) {
           const canvas = document.createElement('canvas');
           canvas.width = 512;
           canvas.height = 512;
-          canvas.className = 'pixel-canvas w-20 h-20 object-contain rounded-xl bg-neutral-950 mb-1';
+          canvas.className = 'pixel-canvas w-16 h-16 object-contain rounded-xl bg-neutral-950 mb-1';
 
           table.innerHTML = `
             <button onclick="removeSnakeFromFloor('${snake.id}')" class="absolute top-1.5 right-1.5 w-5 h-5 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 rounded-full text-[10px] flex items-center justify-center">✕</button>
-            <div class="text-[9px] font-bold text-amber-400 mb-1">TABLE ${i + 1}</div>
+            <div class="text-[9px] font-bold text-amber-400 mb-0.5">TABLE ${i + 1}</div>
           `;
           table.appendChild(canvas);
           table.innerHTML += `
-            <div class="text-[11px] font-bold text-white text-center truncate w-full mt-1">${snake.name}</div>
-            <div class="text-[10px] text-emerald-400 font-bold">$${Math.round(snake.value * 1.25)} (Expo Price)</div>
+            <div class="text-[10px] font-bold text-white text-center truncate w-full mt-0.5">${snake.name}</div>
+            <div class="text-[9px] text-emerald-400 font-bold">$${Math.round(snake.value * 1.25)}</div>
           `;
           grid.appendChild(table);
           renderSnakePixelArt(canvas, snake);
         } else {
           table.innerHTML = `
-            <span class="text-neutral-600 text-lg mb-1">📦</span>
-            <div class="text-[10px] text-neutral-400 font-semibold">Table ${i + 1} Empty</div>
-            <div class="text-[9px] text-neutral-600 mt-1">Assign in Rack</div>
+            <span class="text-neutral-600 text-base mb-1">📦</span>
+            <div class="text-[10px] text-neutral-400 font-semibold">Table ${i + 1}</div>
+            <div class="text-[8px] text-neutral-600">Available</div>
           `;
           grid.appendChild(table);
         }
@@ -2119,6 +2218,42 @@
       playSound('tap');
       gameState.floorSnakeIds = gameState.floorSnakeIds.filter(id => id !== snakeId);
       showToast('Removed from display table.', '🎪');
+      renderFloor();
+      renderRack();
+      updateTopBar();
+    }
+
+    function quickFillFloorCheapest() {
+      if (!gameState.floorSnakeIds) gameState.floorSnakeIds = [];
+      if (!gameState.vaultSnakeIds) gameState.vaultSnakeIds = [];
+
+      const maxSlots = gameState.floorCapacity || 8;
+      const openSlots = maxSlots - gameState.floorSnakeIds.length;
+
+      if (openSlots <= 0) {
+        showToast('Showroom tables are already completely full!', '⚠️');
+        return;
+      }
+
+      // Filter available candidates: not currently on the floor, and not in the private vault
+      const availableSnakes = gameState.snakes.filter(s =>
+        !gameState.floorSnakeIds.includes(s.id) &&
+        !gameState.vaultSnakeIds.includes(s.id)
+      );
+
+      if (availableSnakes.length === 0) {
+        showToast('No eligible non-vault snakes available to display.', '⚠️');
+        return;
+      }
+
+      // Sort lowest value first
+      availableSnakes.sort((a, b) => a.value - b.value);
+
+      const toAdd = availableSnakes.slice(0, openSlots);
+      toAdd.forEach(s => gameState.floorSnakeIds.push(s.id));
+
+      playSound('cash');
+      showToast(`Filled ${toAdd.length} table${toAdd.length === 1 ? '' : 's'} with lowest-value snakes!`, '⚡');
       renderFloor();
       renderRack();
       updateTopBar();
@@ -2217,8 +2352,12 @@
         const row = document.createElement('div');
         row.className = 'p-3 bg-neutral-950/80 rounded-2xl border border-neutral-800 flex justify-between items-center text-xs';
 
-        // Check if user has qualifying snake
-        const qual = gameState.snakes.find(s => s.genes.includes(req.targetGene) && s.weight >= req.minWeight && !(gameState.vaultSnakeIds || []).includes(s.id));
+        // Count how many non-vault snakes qualify
+        const qualCount = gameState.snakes.filter(s =>
+          s.genes.includes(req.targetGene) &&
+          s.weight >= req.minWeight &&
+          !(gameState.vaultSnakeIds || []).includes(s.id)
+        ).length;
 
         row.innerHTML = `
           <div>
@@ -2227,12 +2366,12 @@
             <div class="text-xs text-emerald-400 font-bold mt-0.5">Bounty: $${req.reward}</div>
           </div>
           <div>
-            ${qual ? `
-              <button onclick="fulfillRequest('${req.id}', '${qual.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition">
-                Fulfill (${qual.name})
+            ${qualCount > 0 ? `
+              <button onclick="openContractPicker('${req.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold active:scale-95 transition">
+                Fulfill (${qualCount} Ready)
               </button>
             ` : `
-              <span class="text-[10px] text-neutral-500 italic">No Match</span>
+              <span class="text-[10px] text-neutral-500 italic">No Matching Stock</span>
             `}
           </div>
         `;
@@ -2240,14 +2379,62 @@
       });
     }
 
-    function fulfillRequest(reqId, snakeId) {
-      const rIdx = gameState.activeRequests.findIndex(r => r.id === reqId);
+    function openContractPicker(reqId) {
+      playSound('tap');
+      const req = gameState.activeRequests.find(r => r.id === reqId);
+      if (!req) return;
+
+      gameState.activeContractReq = req;
+      document.getElementById('contract-modal-title').textContent = `${req.client} Bounty`;
+      document.getElementById('contract-modal-req').textContent = `Needs: ${req.targetGene} (${req.minWeight}g+) • Reward: $${req.reward}`;
+
+      const list = document.getElementById('contract-candidates-list');
+      list.innerHTML = '';
+
+      // Find all qualifying non-vault snakes
+      const matches = gameState.snakes.filter(s =>
+        s.genes.includes(req.targetGene) &&
+        s.weight >= req.minWeight &&
+        !(gameState.vaultSnakeIds || []).includes(s.id)
+      );
+
+      if (matches.length === 0) {
+        list.innerHTML = `<div class="text-xs text-neutral-500 text-center py-4">No qualifying non-vault snakes available.</div>`;
+      } else {
+        matches.forEach(snake => {
+          const item = document.createElement('div');
+          item.className = 'p-2.5 bg-neutral-950 border border-neutral-800 rounded-2xl flex items-center justify-between text-xs hover:border-neutral-700 transition';
+          item.innerHTML = `
+            <div>
+              <div class="font-bold text-white">${snake.name}</div>
+              <div class="text-[10px] text-neutral-400">${snake.gender === 'male' ? '♂ Male' : '♀ Female'} • ${snake.weight}g • Market: $${snake.value}</div>
+            </div>
+            <button onclick="confirmDeliverSnakeToContract('${snake.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl active:scale-95 transition">
+              Deliver
+            </button>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      document.getElementById('contract-modal').classList.remove('hidden');
+    }
+
+    function closeContractModal() {
+      playSound('tap');
+      document.getElementById('contract-modal').classList.add('hidden');
+      gameState.activeContractReq = null;
+    }
+
+    function confirmDeliverSnakeToContract(snakeId) {
+      if (!gameState.activeContractReq) return;
+      const req = gameState.activeContractReq;
       const sIdx = gameState.snakes.findIndex(s => s.id === snakeId);
-      if (rIdx === -1 || sIdx === -1) return;
+      const rIdx = gameState.activeRequests.findIndex(r => r.id === req.id);
 
-      const req = gameState.activeRequests[rIdx];
+      if (sIdx === -1 || rIdx === -1) return;
+
       const snake = gameState.snakes[sIdx];
-
       gameState.cash += req.reward;
       gameState.rep += 15;
       gameState.snakes.splice(sIdx, 1);
@@ -2255,7 +2442,8 @@
       gameState.activeRequests.splice(rIdx, 1);
 
       playSound('cash');
-      showToast(`Bounty fulfilled! Earned +$${req.reward} & +15 Rep!`, '🏆');
+      showToast(`Delivered ${snake.name}! Earned +$${req.reward} & +15 Rep!`, '🏆');
+      closeContractModal();
       renderRequests();
       renderRack();
       renderFloor();
@@ -2416,6 +2604,26 @@
         `;
         enc.appendChild(card);
       });
+
+      // Render Secret Breeding Recipes Guide
+      const recipeList = document.getElementById('recipes-guide-list');
+      if (recipeList) {
+        recipeList.innerHTML = '';
+        SECRET_RECIPES.forEach(rec => {
+          const item = document.createElement('div');
+          item.className = 'p-2 bg-neutral-950 rounded-xl border border-neutral-800/80 flex justify-between items-center';
+          item.innerHTML = `
+            <div>
+              <span class="font-bold text-white text-xs">${rec.morph}</span>
+              <div class="text-[10px] text-neutral-400">Recipe: <span class="text-amber-300 font-semibold">${rec.hint}</span></div>
+            </div>
+            <span class="text-[9px] font-mono text-emerald-400 font-bold bg-emerald-950/60 border border-emerald-800/40 px-1.5 py-0.5 rounded-md">
+              ${Math.round(rec.chance * 100)}% Odds
+            </span>
+          `;
+          recipeList.appendChild(item);
+        });
+      }
     }
 
     function calculatePunnettOdds() {
